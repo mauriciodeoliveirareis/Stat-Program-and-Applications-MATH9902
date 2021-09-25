@@ -31,7 +31,7 @@ Pros:
 
 
 Cons:  
-It's sensitive to extreme values. Looks what happens for the mean salary from Merit Market editors when mister Merit Jr. becomes 18 and starts working on the department:
+It's sensitive to extreme values. Look what happens with the mean salary from Merit Market editors when mister Merit Jr. becomes 18 and starts working on the department:
 ```{r}
 meritJrGenerousSalary <- 90
 editorsSalaries=c(12, 10,11, 12,9,13,12,meritJrGenerousSalary) 
@@ -60,7 +60,7 @@ median(editorsSalaries)
 ```
   
   
-Cons: The set must be ordered, you can make a calculation up in your head that easily. Also, It doesn't use all the data set so, if your distribution is left or right skewed, it might be misleading used alone
+Cons: The set must be ordered, you can't make a calculation up in your head that easily. Also, It doesn't use all the data set so, if your distribution is left or right skewed, it might be misleading used alone
 
 
 ## iii Variance
@@ -85,26 +85,41 @@ Cons: sensitive to cons from the mode like more than one mode in the distributio
 
 # Counting
 
-## 2. How many different combinations of 4 cards can be made for a 52 card deck.
+## 2. How many different combinations of 4 cards can be made for a 52 card deck.  
+The order doesn't matter here so that will be:
+$$ \frac{52!}{4! * (52 - 4)!}  -> \frac{52!}{4! * 48!} -> \frac{52 * 51 * 50 * 49}{4!} -> \frac{6497400}{24} -> 270725 $$
 
 ## 3. A bank issues bank cards with PINs consisting of 4 digits, each one {0,1,2,...,9}. How many unique PINs are there if
 
 ## i. Any 4-digit code can be used.
+That is 10 possibilities for each digit so, it's `10*10*10*10` = 10.000 or 
+$$ 10^4 $$
 
 ## ii. The digits must be different.
+That is 10 possibilities for the first digit and one less for each subsequent `10*9*8*7` = 5040 or
+$$ \frac{10!} {(10-4)!} -> \frac{10 * 9 * 8 * 7 * 6!} {6!} -> 10 * 9 * 8 * 7 -> 5040$$
+
 
 ## 4. In a lottery, each ticket has 5 one-digit numbers 0-9 which is not repeated on it.
 
 ## i You win if your ticket has the digits in any order. What are the total number of possible combinations?
+$$ \frac{10!}{5! * (10 - 5)!}  -> \frac{10*9*8*7*6* 5!}{5! * 5!} -> \frac {10*9*8*7* 6} {5!} -> \frac{30240}{120} -> 252 $$
 
-\#\#ii You would win only if your ticket has the digits in the required order. What are the total number of combinations?
+##ii You would win only if your ticket has the digits in the required order. What are the total number of combinations?  
+$$ \frac{10!} {(10-5)!} -> \frac{10*9*8*7*6*5!} {5!} -> 10 * 9 * 8 * 7 * 6-> 30240 $$
 
+  
+  
 ## 5. How many different combinations of 6 cards can be made for a 52 card deck if
 
 ## i) order matters.
-
+$$ \frac{52!}{(52 - 6)!}  -> \frac{52*51*50*49*48*47*46!}{46!}->52*51*50*49*48*47-> 14.658.134.400$$
 ## ii) order does not matter
-
+$$ \frac{52!}{6! * (52 - 6)!}  -> \frac{52*51*50*49*48*47*46!}{6! * 46!}->\frac{52*51*50*49*48*47}{6!}-> 20358520$$
+  
+  
+  
+  
 ## 6. A poker hand consists of 7 cards:
 
 ## i) How many different hands are possible, if order does not matter, 
