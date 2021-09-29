@@ -1,0 +1,39 @@
+---
+html_document:
+  mathjax: http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+author: "Mauricio Reis | 0000000"
+title: "Lab 1"
+output:
+  html_document:
+    df_print: paged
+---
+
+<br>
+
+1. Install R and Rstudio.
+
+2. Open Rstudio and install the two packages `rmarkdown` and `tinytex`.
+
+3. Download this rmd file by clicking on 'Code > Download Rmd' on the top right bottom of this html page.
+
+4. Enter you Name, Surname and Student Number after 'author:' in the Header of the rmd file.
+
+This is a code chunk:
+```{r}
+a <- 1:10 # sequence of numbers from 1 to 10 saved in the object called 'a'
+a
+```
+
+5. Press the green triangle button on the toolbar (top right) of a code chunk that has the tooltip 'Run Current Chunk' to execute the code and produce the output.
+
+When code is executed, its output appears beneath the code chunk that produced it. 
+```{r}
+b <- exp(a)
+plot(b, xlab = 'a', ylab = 'b = exp(a)')
+```
+
+6. Execute all the chunks and preview the notebook by clicking the 'Preview' button in the editor toolbar.
+
+**NB** The notebook preview does **not** execute any of your R code chunks. It simply shows you a rendered copy of the output of your document along with the most recent chunk output.
+
+This will generate a file called 'lab_1.nb.html'.

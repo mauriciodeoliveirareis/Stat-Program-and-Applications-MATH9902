@@ -37,3 +37,8 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+.DS_Store
+.python-version
+Stat-Program-and-Applications-MATH9902.Rproj
+introToStats/.DS_Store
