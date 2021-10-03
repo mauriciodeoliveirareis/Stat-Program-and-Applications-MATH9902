@@ -1,0 +1,152 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+**Problem Sheet 1b
+Mathematical Probability**
+```{r setup, include=FALSE}
+library("tidyr")
+```
+1\. The events A and B are defined on a sample space. The following probabilities are known: Pr(A)=
+2/3; Pr(B)= 1/6 and Pr(A ∩B)= 1/6
+
+a) Are A and B mutually exclusive and independent?  
+As Pr(A ∩B) is not equal to zero, they are not mutually exclusive.  
+Also, as Pr(A ∩B) is not equal to P(A) * P (B), they are not independent
+```{r}
+prA <- 2/3
+prB <- 1/6
+prAintersecB <- 1/6
+prA * prB == prAintersecB
+```
+b) Find the following additional probabilities:
+  
+i Pr(notA)  
+```{r}
+1 - 2/3
+```
+
+ii Pr(A ∪B)    
+Pr(A ∪B) = P(A) + P(B) - Pr(A ∩B) so:
+```{r}
+prA + prB - prAintersecB
+```
+
+
+iii Pr(A\|B)  
+$$\frac{Pr(A ∩B)}{Pr(B)} $$
+```{r}
+prAintersecB / prB
+```
+      
+2\. The events A and B are defined on a sample space. The following probabilities are known: Pr(A)=
+1/2 ; Pr(B)= 1⁄2 and Pr(A ∪B)= 5⁄6.
+```{r comment="Exercise 2 setup"}
+prA <- 1/2
+prB <- 1/2
+prAunionB <- 5/6
+```
+Find the following additional probabilities:  
+i Pr(A)= Pr(notA)  
+Pr(notA) = 1 - Pr(A) so
+```{r}
+prNotA <- 1 - prA 
+prA == prNotA
+```
+
+ii Pr(A ∩ B)  
+$$Pr(A ∪B) = Pr(A) + Pr(B) - Pr(A ∩B) -> $$
+$$ -> - Pr(A ∩B) = Pr(A ∪B) - Pr(A) - Pr(B) $$
+```{r}
+prAintersecB <- (prAunionB - prA - prB) * -1
+prAintersecB
+```
+iii Pr(A\|B)
+$$ Pr(A|B) =  \frac{Pr(A ∩B)}{p(B)} $$
+```{r}
+prAgivenB <- prAintersecB / prB
+prAgivenB
+```  
+  
+3\. The events A and B are defined on a sample space. For each of the following conditions write down the defining probability statement in terms of A and B.
+
+i The probability of all events except A  
+Can be Pr(notA) or 1 - Pr(A)  
+
+ii A and B are mutually exclusive  
+Pr(A ∩B) = 0  
+
+iii A and B are mutually exclusive and exhaustive  
+Pr(A ∩B) = 0 and Pr(A ∪B) = 1  
+
+iv The probability of A and/or B\  
+Pr(A ∪B)
+v The probability of A given B  
+$$ Pr(A|B) =  \frac{Pr(A ∩B)}{p(B)} $$  
+
+
+
+4\. A standard green and a standard red die are thrown at the same time.  
+i Define the sample space for all the events.  
+
+```{r}
+greenDieFaces <- c(1,2,3,4,5,6)
+redDieFaces <- c(1,2,3,4,5,6)
+
+crossing(greenDieFaces, redDieFaces)
+```
+
+ii What is probability that the sum of the scores on the two dice is greater than 6.  
+$$ \frac{numberOfCasesThatSumGreaterThanSix}{totalNumberOfCombinations} $$
+```{r}
+totalNumberOfCombinations <- length(greenDieFaces) * length(redDieFaces)
+totalBiggerThanSix = 0
+for(gFace in greenDieFaces) {
+  for(rFace in redDieFaces) {
+    if(gFace + rFace > 6) {
+      totalBiggerThanSix = totalBiggerThanSix + 1 
+    }
+  }
+}
+totalBiggerThanSix / totalNumberOfCombinations
+```
+iii What is the probability that the green die is less than 5.
+
+iv That is the probability that the sum of the two die is greater than six given that the green die is
+less than 5.
+
+**Conditional Probability**
+
+5\. 20% of the population owns a smart-phone and a tablet, and 60% of the population own a smart-
+phone. What is the probability that a someone owns a tablet given that they own a smart-phone?
+
+6\. The probability that it is Friday and that a student is absent is 0.03. Since there are 5 school days in
+a week, the probability that it is Friday is 0.2. What is the probability that a student is absent given
+that today is Friday?
+
+**Bayes Probability**
+
+7\. In 2015, of the 200 million people registered to vote in America 4% say they will vote for Donald
+Trump. Of these voters 50% are climate change sceptics, while only 8.3% of the other voters are
+climate change sceptics.
+
+a) Find the probability that a voter selected is a climate change sceptic.
+
+b) If a voter is selected and they are a climate change sceptic, determine the probability that they
+will vote for Trump.
+
+8\. In 2015, of the 200 million people registered to vote in America 38% say they will vote for Donald
+Trump. Of these voters 20% are birthers (people who questioned that President Obama was born in
+the US), while only 1% of the other voters are birthers.
+
+a) Find the probability that a voter selected is a birther.
+
+b) If a voter is selected and they are a birther, determine the probability that they will vote for
+Trump.
+
+9\. In a school 30% of the students are male. Of these males 20% have long hair, while 90% of the
+female students have long hair.
+
+i Find the probability that a student selected has long hair.\
+ii If a student is selected and they have long hair, determine the probability that the student is male.
