@@ -204,13 +204,14 @@ female students have long hair.
 i Find the probability that a student selected has long hair.\
 of men -> 0.3 * 0.2 = 0.06  
 of women -> 0.7 * 0.9 = 0.63
-Total -> 0.69  s
-ii If a student is selected and they have long hair, determine the probability that the student is male.
-prevalence = 0.69
-sensitivity = 0.2
-specificity = 0.1
-$$ \frac{0.2 * 0.69}{0.2 * 0.69 + (1-0.69) * (1 - 0.1)} $$  
+Total -> 0.69  
 
+ii If a student is selected and they have long hair, determine the probability that the student is male.  
+prevalence = 0.69  
+sensitivity = 0.2  
+specificity = 0.1  
+$$ \frac{0.2 * 0.69}{0.2 * 0.69 + (1-0.69) * (1 - 0.1)} $$  
+  
 
 ```{r}
 (0.2 * 0.69) / ( (0.2 * 0.69) + (1 - 0.69) * (1-0.1))

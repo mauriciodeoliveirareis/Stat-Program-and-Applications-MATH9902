@@ -309,7 +309,15 @@ specifity = 0.99<br />
 <pre><code>## [1] 0.6417363</code></pre>
 <p>9. In a school 30% of the students are male. Of these males 20% have long hair, while 90% of the female students have long hair.</p>
 <p>i Find the probability that a student selected has long hair.<br />
-ii If a student is selected and they have long hair, determine the probability that the student is male.</p>
+of men -&gt; 0.3 * 0.2 = 0.06<br />
+of women -&gt; 0.7 * 0.9 = 0.63 Total -&gt; 0.69</p>
+<p>ii If a student is selected and they have long hair, determine the probability that the student is male.<br />
+prevalence = 0.69<br />
+sensitivity = 0.2<br />
+specificity = 0.1<br />
+<span class="math display">\[ \frac{0.2 * 0.69}{0.2 * 0.69 + (1-0.69) * (1 - 0.1)} \]</span></p>
+<pre class="r"><code>(0.2 * 0.69) / ( (0.2 * 0.69) + (1 - 0.69) * (1-0.1))</code></pre>
+<pre><code>## [1] 0.3309353</code></pre>
 
 
 
