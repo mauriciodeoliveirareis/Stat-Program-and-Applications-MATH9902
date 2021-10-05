@@ -81,7 +81,7 @@ iii A and B are mutually exclusive and exhaustive
 Pr(A ∩B) = 0 and Pr(A ∪B) = 1  
 
 iv The probability of A and/or B\  
-Pr(A ∪B)
+Pr(A ∪B)  *!!!Is that right?!!!*  
 v The probability of A given B  
 $$ Pr(A|B) =  \frac{Pr(A ∩B)}{p(B)} $$  
 
@@ -120,7 +120,7 @@ totalNumberOfCombinations <- length(greenDieFaces) * length(redDieFaces)
 totalBiggerThanSix = 0
 for(gFace in greenDieFaces) {
   for(rFace in redDieFaces) {
-    if(gFace + rFace > 6 && gFace < 5 && rFace < 5) {
+    if(gFace + rFace > 6 && gFace < 5) {
       totalBiggerThanSix = totalBiggerThanSix + 1 
     }
   }
@@ -162,7 +162,7 @@ From others: 0.96 * 0.083 = 0.079
 Total Skeptcs (Also prevalence/prob in total): 0.081
 
 
-b) If a voter is selected and they are a climate change sceptic, determine the probability that they will vote for Trump.
+b) If a voter is selected and they are a climate change sceptic, determine the probability that they will vote for Trump.!!!This is wrong !!!
 "has the desease" = 4%(vote for trump)
 "test positive" = climate skeptc 
 prevalence = total skeptics
@@ -206,7 +206,7 @@ of men -> 0.3 * 0.2 = 0.06
 of women -> 0.7 * 0.9 = 0.63
 Total -> 0.69  
 
-ii If a student is selected and they have long hair, determine the probability that the student is male.  
+ii If a student is selected and they have long hair, determine the probability that the student is male.  !!!This is wrong !!!
 prevalence = 0.69  
 sensitivity = 0.2  
 specificity = 0.1  
