@@ -1,0 +1,64 @@
+---
+html_document:
+  mathjax: http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+output: html_notebook
+title: "Assignment 1"
+author: "Mauricio Reis | 0000000"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, cache = TRUE)
+```
+
+<br>
+
+### Two dice $D_1$ and $D_2$ are rolled and let $S$ be the sum $S = D_1 + D_2.$
+
+#### 1. Find $\Pr(D_1 < 4\ \cup\ S > 9)$ [**10 marks**]
+```{r}
+# insert code
+```
+
+#### 2. Find $\Pr(D_1 < 4\ |\ S = 8)$ [**10 marks**]
+```{r}
+# insert code
+```
+
+### Suppose $X \sim Binomial(n = 10, p = 0.3).$
+
+#### 3. Find $\Pr(X \le 6 \cap 2 < X < 8).$ [**10 marks**]
+```{r}
+# insert code
+```
+
+#### 4. Find $\Pr(X < 4\ |\ X \le 6).$ [**10 marks**]
+```{r}
+# insert code
+```
+
+### Suppose $X \sim Poisson(\lambda = 5).$
+
+#### 5. Find $\Pr(3 < X \le 7).$ [**10 marks**]
+```{r}
+# insert code
+```
+
+#### 6. Find $\Pr(X < 3 \cup X \ge 7).$ [**10 marks**]
+```{r}
+# insert code
+```
+
+### Create a function [**40 marks**]
+
+Suppose $X \sim Poisson(\lambda).$ Create a function which plots the pmf and cdf for the interval $[x_1 - 5, x_1 + 5]$ and calculate the $p(x_1)$ and $F(x_1)$ for a given value of $x_1.$
+
+* Input: $x_1$ and $\lambda;$
+* Output: $p(x_1)$ and $F(x_1)$
+* Extra feature: stop the function if $\lambda$ is negative and print a warning message. 
+[**40 marks**]
+```{r}
+# insert code
+```
+
+
+
