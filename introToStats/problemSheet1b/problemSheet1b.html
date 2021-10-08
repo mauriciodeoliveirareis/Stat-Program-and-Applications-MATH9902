@@ -167,7 +167,7 @@ pre code {
 </div>
 
 
-<p><strong>Problem Sheet 1b Mathematical Probability</strong></p>
+<p>Problem Sheet 1b Mathematical Probability**</p>
 <p>1. The events A and B are defined on a sample space. The following probabilities are known: Pr(A)= 2/3; Pr(B)= 1/6 and Pr(A ∩B)= 1/6</p>
 <ol style="list-style-type: lower-alpha">
 <li>Are A and B mutually exclusive and independent?<br />
@@ -219,8 +219,8 @@ Can be Pr(notA) or 1 - Pr(A)</p>
 Pr(A ∩B) = 0</p>
 <p>iii A and B are mutually exclusive and exhaustive<br />
 Pr(A ∩B) = 0 and Pr(A ∪B) = 1</p>
-<p>iv The probability of A and/or B  Pr(A ∪B) <em>!!!Is that right?!!!</em><br />
-v The probability of A given B<br />
+<p>iv The probability of A and/or B<br />
+<span class="math display">\[Pr(A ∪B) -&gt; P(A) + P(B) - P(A ∩ B) \]</span> v The probability of A given B<br />
 <span class="math display">\[ Pr(A|B) =  \frac{Pr(A ∩B)}{p(B)} \]</span></p>
 <p>4. A standard green and a standard red die are thrown at the same time.<br />
 i Define the sample space for all the events.</p>
@@ -262,13 +262,13 @@ iv That is the probability that the sum of the two die is greater than six given
 totalBiggerThanSix = 0
 for(gFace in greenDieFaces) {
   for(rFace in redDieFaces) {
-    if(gFace + rFace &gt; 6 &amp;&amp; gFace &lt; 5 &amp;&amp; rFace &lt; 5) {
+    if(gFace + rFace &gt; 6 &amp;&amp; gFace &lt; 5) {
       totalBiggerThanSix = totalBiggerThanSix + 1 
     }
   }
 }
 totalBiggerThanSix / totalNumberOfCombinations</code></pre>
-<pre><code>## [1] 0.08333333</code></pre>
+<pre><code>## [1] 0.2777778</code></pre>
 <p><strong>Conditional Probability</strong></p>
 <p>5. 20% of the population owns a smart-phone and a tablet, and 60% of the population own a smart- phone. What is the probability that a someone owns a tablet given that they own a smart-phone?<br />
 Pr(os) = 0.6, Pr(os ∩ ot) = 0.2<br />
@@ -286,39 +286,35 @@ prAGivenF</code></pre>
 <pre><code>## [1] 0.15</code></pre>
 <p><strong>Bayes Probability</strong></p>
 <p>7. In 2015, of the 200 million people registered to vote in America 4% say they will vote for Donald Trump. Of these voters 50% are climate change sceptics, while only 8.3% of the other voters are climate change sceptics.<br />
-a) Find the probability that a voter selected is a climate change skeptic. From Trump voters: 0.04 * 0.5 = 0.02 From others: 0.96 * 0.083 = 0.079 Total Skeptcs (Also prevalence/prob in total): 0.081</p>
+a) Find the probability that a voter selected is a climate change skeptic. Given Trump T, Climate Skeptic C From Trump voters: <span class="math display">\[P(T ∩ C) = 0.04 * 0.5 = 0.02 \]</span></p>
+<p>From others: <span class="math display">\[P(!T ∩ C) = 0.96 * 0.083 = 0.079 \]</span></p>
+<p>Total Skeptcs (Also prevalence/prob in total): <span class="math display">\[P(C) = 0.081 \]</span></p>
 <ol start="2" style="list-style-type: lower-alpha">
-<li>If a voter is selected and they are a climate change sceptic, determine the probability that they will vote for Trump. “has the desease” = 4%(vote for trump) “test positive” = climate skeptc prevalence = total skeptics</li>
+<li>If a voter is selected and they are a climate change sceptic, determine the probability that they will vote for Trump.</li>
 </ol>
-<p>sensitivity = 0.5 prevalence = 0.081 specifity = (1 - 0.083) = 0.917</p>
-<p><span class="math display">\[ \frac{0.5 * 0.081}{0.5 * 0.081 + (1-0.081) * (1 - 0.917)} \]</span></p>
-<pre class="r"><code>(0.5 * 0.081) / ( (0.5 * 0.081) + (1 - 0.081) * (1-0.917))</code></pre>
-<pre><code>## [1] 0.3468149</code></pre>
-<p>8. In 2015, of the 200 million people registered to vote in America 38% say they will vote for Donald Trump. Of these voters 20% are birthers (people who questioned that President Obama was born in the US), while only 1% of the other voters are birthers.</p>
-<ol style="list-style-type: lower-alpha">
-<li><p>Find the probability that a voter selected is a birther.<br />
-From Trump voters: 0.38 * 0.2 = 0.076<br />
-from other voters: 0.62 * 0.01 = 0.0062<br />
-Prevalence = 0.0822</p></li>
-<li><p>If a voter is selected and they are a birther, determine the probability that they will vote for Trump.<br />
-sensitivity = 0.2<br />
-prevalence = 0.0822<br />
-specifity = 0.99<br />
-<span class="math display">\[ \frac{0.2 * 0.0822}{0.2 * 0.0822 + (1-0.0822) * (1 - 0.99)} \]</span></p></li>
+<p><span class="math display">\[ P(T|C) = \frac{P(T ∩ C)}{P(c)} = \frac{0.02}{0.081} \]</span></p>
+<pre class="r"><code>(0.02 / 0.081)</code></pre>
+<pre><code>## [1] 0.2469136</code></pre>
+<p>8. In 2015, of the 200 million people registered to vote in America 38% say they will vote for Donald Trump. Of these voters 20% are birthers (people who questioned that President Obama was born in the US), while only 1% of the other voters are birthers. Given Trump T, Birther B a) Find the probability that a voter selected is a birther.<br />
+From Trump voters P(T ∩ B) : 0.38 * 0.2 = 0.076<br />
+from other voters P(!T ∩ B): 0.62 * 0.01 = 0.0062<br />
+Probability of Birthers P(B) = 0.0822</p>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>If a voter is selected and they are a birther, determine the probability that they will vote for Trump.</li>
 </ol>
-<pre class="r"><code>(0.2 * 0.0822) / ( (0.2 * 0.0822) + (1 - 0.0822) * (1-0.99))</code></pre>
-<pre><code>## [1] 0.6417363</code></pre>
-<p>9. In a school 30% of the students are male. Of these males 20% have long hair, while 90% of the female students have long hair.</p>
-<p>i Find the probability that a student selected has long hair.<br />
-of men -&gt; 0.3 * 0.2 = 0.06<br />
-of women -&gt; 0.7 * 0.9 = 0.63 Total -&gt; 0.69</p>
-<p>ii If a student is selected and they have long hair, determine the probability that the student is male.<br />
-prevalence = 0.69<br />
-sensitivity = 0.2<br />
-specificity = 0.1<br />
-<span class="math display">\[ \frac{0.2 * 0.69}{0.2 * 0.69 + (1-0.69) * (1 - 0.1)} \]</span></p>
-<pre class="r"><code>(0.2 * 0.69) / ( (0.2 * 0.69) + (1 - 0.69) * (1-0.1))</code></pre>
-<pre><code>## [1] 0.3309353</code></pre>
+<p><span class="math display">\[ P(T|B) =  \frac{P(T ∩ B)}{P(B)} = \frac{0.076}{0.0822}  \]</span></p>
+<pre class="r"><code>(0.076 / 0.0822)</code></pre>
+<pre><code>## [1] 0.9245742</code></pre>
+<p>9. In a school 30% of the students are male. Of these males 20% have long hair, while 90% of the female students have long hair.<br />
+Given Male M and Long Hair L<br />
+i Find the probability that a student selected has long hair.<br />
+of male P(M ∩ L) -&gt; 0.3 * 0.2 = 0.06<br />
+of not male P(!M ∩ L) -&gt; 0.7 * 0.9 = 0.63<br />
+P(L) -&gt; 0.06 + 0.063 = 0.69</p>
+<p>ii If a student is selected and they have long hair, determine the probability that the student is male.</p>
+<p><span class="math display">\[ P(M|L) = \frac{P(M ∩ L)}{P(L)} = \frac{0.06}{0.69}\]</span></p>
+<pre class="r"><code>0.06 / 0.69</code></pre>
+<pre><code>## [1] 0.08695652</code></pre>
 
 
 

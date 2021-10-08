@@ -3,7 +3,6 @@ output:
   html_document: default
   pdf_document: default
 ---
-**ATTENTION, I NEED TO REFACTOR THIS AS THERE ARE WRONG ANSWERS HERE
 Problem Sheet 1b
 Mathematical Probability**
 ```{r setup, include=FALSE}
@@ -81,11 +80,10 @@ Pr(A ∩B) = 0
 iii A and B are mutually exclusive and exhaustive  
 Pr(A ∩B) = 0 and Pr(A ∪B) = 1  
 
-iv The probability of A and/or B\  
-Pr(A ∪B)  *!!!Is that right?!!!*  
+iv The probability of A and/or B  
+$$Pr(A ∪B) -> P(A) + P(B) - P(A ∩ B) $$
 v The probability of A given B  
 $$ Pr(A|B) =  \frac{Pr(A ∩B)}{p(B)} $$  
-
 
 
 4\. A standard green and a standard red die are thrown at the same time.  
@@ -158,24 +156,24 @@ prAGivenF
 Trump. Of these voters 50% are climate change sceptics, while only 8.3% of the other voters are
 climate change sceptics.  
 a) Find the probability that a voter selected is a climate change skeptic.
-From Trump voters: 0.04 * 0.5 = 0.02
-From others: 0.96 * 0.083 = 0.079
-Total Skeptcs (Also prevalence/prob in total): 0.081
+Given Trump T, Climate Skeptic C
+From Trump voters: 
+$$P(T ∩ C) = 0.04 * 0.5 = 0.02 $$  
+
+From others: 
+$$P(!T ∩ C) = 0.96 * 0.083 = 0.079 $$  
+
+Total Skeptcs (Also prevalence/prob in total): 
+$$P(C) = 0.081 $$ 
 
 
-b) If a voter is selected and they are a climate change sceptic, determine the probability that they will vote for Trump.!!!This is wrong !!!
-"has the desease" = 4%(vote for trump)
-"test positive" = climate skeptc 
-prevalence = total skeptics
-
-sensitivity = 0.5
-prevalence = 0.081
-specifity =  (1 - 0.083) = 0.917   
+b) If a voter is selected and they are a climate change sceptic, determine the probability that they will vote for Trump.
+ 
 
 
-$$ \frac{0.5 * 0.081}{0.5 * 0.081 + (1-0.081) * (1 - 0.917)} $$
+$$ P(T|C) = \frac{P(T ∩ C)}{P(c)} = \frac{0.02}{0.081} $$
 ```{r}
-(0.5 * 0.081) / ( (0.5 * 0.081) + (1 - 0.081) * (1-0.917))
+(0.02 / 0.081)
 ```
 
 
@@ -183,37 +181,31 @@ $$ \frac{0.5 * 0.081}{0.5 * 0.081 + (1-0.081) * (1 - 0.917)} $$
 8\. In 2015, of the 200 million people registered to vote in America 38% say they will vote for Donald
 Trump. Of these voters 20% are birthers (people who questioned that President Obama was born in
 the US), while only 1% of the other voters are birthers.
-
+Given Trump T, Birther B
 a) Find the probability that a voter selected is a birther.  
-From Trump voters: 0.38 * 0.2 = 0.076  
-from other voters: 0.62 * 0.01 = 0.0062  
-Prevalence = 0.0822  
+From Trump voters P(T ∩ B) : 0.38 * 0.2 = 0.076  
+from other voters P(!T ∩ B): 0.62 * 0.01 = 0.0062  
+Probability of Birthers P(B) = 0.0822  
 
-b) If a voter is selected and they are a birther, determine the probability that they will vote for
-Trump.  
-sensitivity = 0.2   
-prevalence = 0.0822  
-specifity = 0.99  
-$$ \frac{0.2 * 0.0822}{0.2 * 0.0822 + (1-0.0822) * (1 - 0.99)} $$
+b) If a voter is selected and they are a birther, determine the probability that they will vote for Trump.  
+
+$$ P(T|B) =  \frac{P(T ∩ B)}{P(B)} = \frac{0.076}{0.0822}  $$
 ```{r}
-(0.2 * 0.0822) / ( (0.2 * 0.0822) + (1 - 0.0822) * (1-0.99))
+(0.076 / 0.0822)
 ```
 
-9\. In a school 30% of the students are male. Of these males 20% have long hair, while 90% of the
-female students have long hair.
-
+9\. In a school 30% of the students are male. Of these males 20% have long hair, while 90% of the female students have long hair.  
+Given Male M and Long Hair L  
 i Find the probability that a student selected has long hair.\
-of men -> 0.3 * 0.2 = 0.06  
-of women -> 0.7 * 0.9 = 0.63
-Total -> 0.69  
+of male P(M ∩ L) -> 0.3 * 0.2 = 0.06  
+of not male P(!M ∩ L) -> 0.7 * 0.9 = 0.63  
+P(L) -> 0.06 + 0.063 = 0.69  
 
-ii If a student is selected and they have long hair, determine the probability that the student is male.  !!!This is wrong !!!
-prevalence = 0.69  
-sensitivity = 0.2  
-specificity = 0.1  
-$$ \frac{0.2 * 0.69}{0.2 * 0.69 + (1-0.69) * (1 - 0.1)} $$  
+ii If a student is selected and they have long hair, determine the probability that the student is male.  
+
+$$ P(M|L) = \frac{P(M ∩ L)}{P(L)} = \frac{0.06}{0.69}$$  
   
 
 ```{r}
-(0.2 * 0.69) / ( (0.2 * 0.69) + (1 - 0.69) * (1-0.1))
+0.06 / 0.69
 ```
