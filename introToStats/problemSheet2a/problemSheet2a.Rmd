@@ -1,0 +1,51 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+
+**Problem Sheet 2a Probability Mass Distributions**
+
+```{r setup, include=FALSE}
+library("tidyr")
+```
+
+
+1.  The probability mass function of a discrete random variable X is given in the following table:
+```{r}
+data.frame("x" = "p(x)", "0" = 0.1, "1"=0.2, "2"=0.4, "3"=0.2, "4"=0.1)
+```
+    
+Find the E[X] and Var[X]  
+k = 4, given the table above then:   
+$$ E[X] = \sum_{k = 0}^{4} kp(k) -> 0*0.1 + 1*0.2 + 2*0.4 + 3*0.2 + 4*0.1 = 2 $$
+$$ E[x] = n*p -> 2 = 4 * p  -> p = 0.5$$
+$$ Var[x] = n*p*(1-p) -> 4*0.5 *(1 - 0.5) -> Var[x] = 1$$
+2.  The probability mass function of a discrete random variable X is given in the following table:
+
+    **x | -2  | -1 | 0  | 1 | 2
+    p(x)| 0.1 | 0.3| 0.3| p3| 0.1**
+  
+Show that p3 = 0.2 and calculate the E[X].
+
+$$ p3 = 1 - (p(-2) + P(-1) + P(0) + P(2)) = 1 - (0.1 + 0.3 +  0.3 + 0.1) = 1 - 0.8 = 0.2  $$
+$$ E[X] = \sum_{k = -2}^{2} kp(k) -> -2*0.1 - 1*0.3 + 0*0.3 + 1*0.2 + 2*0.1 = 0.3 $$
+  
+  
+3. 20% of the Irish population watched Ireland beat France in the Rugby World Cup. A
+    representative from TV3 marketing was sent to Grafton Street to ask passerbys their
+    opinion of the match coverage. Let X denote the number of people need to be asked
+    til the marketer successfully finds some who watched the game.  
+
+i Give the Geometric probability mass function for X.
+p=0.2  
+q=1-0.2 -> q=0.8
+
+$$p(X) = q^{(k-1)} * p  -> P(X) = 0.8^{(k-1)} * 0.2 $$
+
+ii Find the probability that the marketer had to ask exactly 2 people.  
+$$P(2) = 0.8^{(2-1)} * 0.2 = 0.16  $$
+
+iii What is the E[X] and Var[X] of the distribution.  
+$$E[x] = 1/p -> E[x] = 5  $$
+$$Var[x] = q/p^2 -> 0.8/0.2^2 = 0.8/0.04 -> Var[x] = 20  $$
