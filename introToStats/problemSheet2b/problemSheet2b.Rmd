@@ -1,0 +1,46 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+
+**Problem Sheet 2B Probability Mass Distributions**
+
+```{r setup, include=FALSE}
+library("tidyr")
+```
+
+**1. There are 30 candy covered chocolates in a bag M&M's. There is a .1 probability that
+that the candy is red. If X is the number of red M&M's in the bag.**  
+i Give the binomial probability mass function for X.  
+ii Find the probability of less than 2 red M&Ms in the bag.  
+  
+    
+      
+**2. A baby wakes on average 0.25 times every hour.**  
+i If X is the number of times a baby wakes in an hour, give the poisson probability
+mass function for X.  
+ii If X is the number of times a baby wakes in eight hour, give the poisson probability mass function for X.  
+iii What is the probability that the baby does not wake during the 8 hours.  
+  
+    
+      
+**3. Give the features of a**  
+i Geometric Experiment.  
+ii Binomial Experiment.  
+iii Poisson Experiment.  
+  
+    
+      
+**4. Every day a production line makes 100 computers of which 10% are defective. If X is
+the number of defective computers in a day.**  
+a) Give the binomial probability mass function for X.  
+b) Find the probability that there is more than 2 computers defective in a day.  
+  
+    
+      
+**5. A phone center receives 15 calls every 30 minutes.**  
+a) If X is the number of phone calls in 30 minutes, give the poisson probability mass
+function for X.  
+b) What is the probability that there will be exactly 10 phone calls in the first 30
+minutes and exactly 20 phone calls in the second 30 minutes.  
