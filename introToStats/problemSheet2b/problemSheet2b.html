@@ -167,24 +167,73 @@ pre code {
 </div>
 
 
-<p><strong>Problem Sheet 22 Probability Mass Distributions</strong></p>
+<p><strong>Problem Sheet 2B Probability Mass Distributions</strong></p>
 <p><strong>1. There are 30 candy covered chocolates in a bag M&amp;M’s. There is a .1 probability that that the candy is red. If X is the number of red M&amp;M’s in the bag.</strong><br />
 i Give the binomial probability mass function for X.<br />
-ii Find the probability of less than 2 red M&amp;Ms in the bag.</p>
+p = 0.1, q = 0.9, n = 30 <span class="math display">\[ \binom{30}{k} 0.1^k * 0.9^{30-k} \]</span> ii Find the probability of less than 2 red M&amp;Ms in the bag.<br />
+<span class="math display">\[ p(0) = \binom{30}{0} 0.1^0 * 0.9^{30-0} -&gt; 
+   \frac{30!}{(30-0)! * 0!} * 1 * 0.0423 = 0.0423 \]</span></p>
+<pre class="r"><code>#Or, doing it in R step by step:
+ choose(30, 0) * (0.1^0) * (0.9^(30-0))</code></pre>
+<pre><code>## [1] 0.04239116</code></pre>
+<pre class="r"><code>#source tutorial: http://www.r-tutor.com/elementary-statistics/probability-distributions/binomial-distribution
+#Or, doing it in R leveraging the function that calculates it directly:
+probOfZero &lt;- dbinom(0, size=30, prob=0.1) 
+probOfZero</code></pre>
+<pre><code>## [1] 0.04239116</code></pre>
+<p><span class="math display">\[ p(1) = \binom{30}{1} 0.1^1 * 0.9^{30-1} -&gt; 
+   \frac{30!}{(30-1)! * 1!} * 0.1 * 0.0471 = 0.1413 \]</span></p>
+<pre class="r"><code>#Or, doing it in R step by step:
+ choose(30, 1) * (0.1^1) * (0.9^(30-1))</code></pre>
+<pre><code>## [1] 0.1413039</code></pre>
+<pre class="r"><code>#Or, doing it in R leveraging the function that calculates it directly:
+probOfOne &lt;- dbinom(1, size=30, prob=0.1) 
+probOfOne</code></pre>
+<pre><code>## [1] 0.1413039</code></pre>
+<pre class="r"><code>#Probability of less than 2:
+
+probOfZero + probOfOne</code></pre>
+<pre><code>## [1] 0.183695</code></pre>
+<pre class="r"><code>#Or putting all together in a cumulative function:
+pbinom(1, size=30, prob=0.1)</code></pre>
+<pre><code>## [1] 0.183695</code></pre>
 <p><strong>2. A baby wakes on average 0.25 times every hour.</strong><br />
 i If X is the number of times a baby wakes in an hour, give the poisson probability mass function for X.<br />
-ii If X is the number of times a baby wakes in eight hour, give the poisson probability mass function for X.<br />
-iii What is the probability that the baby does not wake during the 8 hours.</p>
+λ = 0.25 <span class="math display">\[ \frac{0.25^X e^{-0.25}}{X!}\]</span> ii If X is the number of times a baby wakes in eight hour, give the poisson probability mass function for X. Average wakes up in 8 hours: 0.25 * 8 = 2<br />
+<span class="math display">\[ \frac{2^X e^{-2}}{X!}\]</span> iii What is the probability that the baby does not wake during the 8 hours.<br />
+<span class="math display">\[ 1 - \frac{2^0 * e^{-2}}{0!} -&gt; \frac{1 * 0.1353} {1} -&gt; 0.1353\]</span></p>
+<pre class="r"><code>#using the poison function in R: 
+ppois(0, lambda=2) </code></pre>
+<pre><code>## [1] 0.1353353</code></pre>
 <p><strong>3. Give the features of a</strong><br />
 i Geometric Experiment.<br />
-ii Binomial Experiment.<br />
-iii Poisson Experiment.</p>
+“You play until you win”.<br />
+2 outcomes: success or failure<br />
+Independent<br />
+p is constant<br />
+X means how many observations till success</p>
+<p>ii Binomial Experiment.<br />
+“You play x amount of times”<br />
+2 outcomes: success or failure<br />
+Independent<br />
+p is constant<br />
+X means how many success in n observations</p>
+<p>iii Poisson Experiment.<br />
+Events happening randomly over time<br />
+Events occur independently<br />
+Rate of occusrence is well defined average<br />
+The random variable (or X) is the number of events in a interval</p>
 <p><strong>4. Every day a production line makes 100 computers of which 10% are defective. If X is the number of defective computers in a day.</strong><br />
 a) Give the binomial probability mass function for X.<br />
-b) Find the probability that there is more than 2 computers defective in a day.</p>
+p=0.1, q=0.9, n=100 <span class="math display">\[ \binom{100}{x} 0.1^x * 0.9^{100-x} \]</span> b) Find the probability that there is more than 2 computers defective in a day.</p>
+<p><span class="math display">\[ probMoreThanTwo = 1-p(2)-p(1)-p(0) \]</span> <span class="math display">\[ 1 - \binom{100}{2} 0.1^2 * 0.9^{100-2} - \binom{100}{1} 0.1^1 * 0.9^{100-1} - \binom{100}{0} 0.1^0 * 0.9^{100-0}\]</span></p>
+<pre class="r"><code>1 - pbinom(2, size=100, prob=0.1)</code></pre>
+<pre><code>## [1] 0.9980551</code></pre>
 <p><strong>5. A phone center receives 15 calls every 30 minutes.</strong><br />
 a) If X is the number of phone calls in 30 minutes, give the poisson probability mass function for X.<br />
-b) What is the probability that there will be exactly 10 phone calls in the first 30 minutes and exactly 20 phone calls in the second 30 minutes.</p>
+<span class="math display">\[ \frac{15^X e^{-15}}{X!}\]</span> b) What is the probability that there will be exactly 10 phone calls in the first 30 minutes and exactly 20 phone calls in the second 30 minutes. <span class="math display">\[ \frac{15^{10} e^{-15}}{10!} * \frac{15^{20} e^{-15}}{20!} \]</span></p>
+<pre class="r"><code>dpois(10, lambda = 15) * dpois(10, lambda = 15)</code></pre>
+<pre><code>## [1] 0.002363005</code></pre>
 
 
 

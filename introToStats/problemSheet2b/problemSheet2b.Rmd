@@ -13,34 +13,104 @@ library("tidyr")
 **1. There are 30 candy covered chocolates in a bag M&M's. There is a .1 probability that
 that the candy is red. If X is the number of red M&M's in the bag.**  
 i Give the binomial probability mass function for X.  
+p = 0.1, q = 0.9, n = 30
+$$ \binom{30}{k} 0.1^k * 0.9^{30-k} $$
 ii Find the probability of less than 2 red M&Ms in the bag.  
-  
-    
-      
+$$ p(0) = \binom{30}{0} 0.1^0 * 0.9^{30-0} -> 
+   \frac{30!}{(30-0)! * 0!} * 1 * 0.0423 = 0.0423 $$ 
+```{r}
+#Or, doing it in R step by step:
+ choose(30, 0) * (0.1^0) * (0.9^(30-0))
+```
+
+```{r}
+#source tutorial: http://www.r-tutor.com/elementary-statistics/probability-distributions/binomial-distribution
+#Or, doing it in R leveraging the function that calculates it directly:
+probOfZero <- dbinom(0, size=30, prob=0.1) 
+probOfZero
+```
+
+$$ p(1) = \binom{30}{1} 0.1^1 * 0.9^{30-1} -> 
+   \frac{30!}{(30-1)! * 1!} * 0.1 * 0.0471 = 0.1413 $$
+```{r}
+#Or, doing it in R step by step:
+ choose(30, 1) * (0.1^1) * (0.9^(30-1))
+```  
+```{r}
+#Or, doing it in R leveraging the function that calculates it directly:
+probOfOne <- dbinom(1, size=30, prob=0.1) 
+probOfOne
+```
+
+```{r}
+#Probability of less than 2:
+
+probOfZero + probOfOne
+```
+
+```{r}
+#Or putting all together in a cumulative function:
+pbinom(1, size=30, prob=0.1)
+```
 **2. A baby wakes on average 0.25 times every hour.**  
 i If X is the number of times a baby wakes in an hour, give the poisson probability
 mass function for X.  
-ii If X is the number of times a baby wakes in eight hour, give the poisson probability mass function for X.  
+λ = 0.25 
+$$ \frac{0.25^X e^{-0.25}}{X!}$$
+ii If X is the number of times a baby wakes in eight hour, give the poisson probability mass function for X.
+Average wakes up in 8 hours: 0.25 * 8 = 2  
+$$ \frac{2^X e^{-2}}{X!}$$
 iii What is the probability that the baby does not wake during the 8 hours.  
-  
-    
+$$ 1 - \frac{2^0 * e^{-2}}{0!} -> \frac{1 * 0.1353} {1} -> 0.1353$$
+```{r}
+#using the poison function in R: 
+ppois(0, lambda=2) 
+```
       
 **3. Give the features of a**  
 i Geometric Experiment.  
-ii Binomial Experiment.  
-iii Poisson Experiment.  
+"You play until you win".  
+2 outcomes: success or failure  
+Independent  
+p is constant  
+X means how many observations till success  
   
+ii Binomial Experiment.  
+"You play x amount of times"  
+2 outcomes: success or failure  
+Independent  
+p is constant  
+X means how many success in n observations
+
+
+iii Poisson Experiment.  
+Events happening randomly over time  
+Events occur independently  
+Rate of occusrence is well defined average  
+The random variable (or X) is the number of events in a interval  
     
       
 **4. Every day a production line makes 100 computers of which 10% are defective. If X is
 the number of defective computers in a day.**  
 a) Give the binomial probability mass function for X.  
+p=0.1, q=0.9, n=100
+$$ \binom{100}{x} 0.1^x * 0.9^{100-x} $$
 b) Find the probability that there is more than 2 computers defective in a day.  
-  
+
+$$ probMoreThanTwo = 1-p(2)-p(1)-p(0) $$ 
+$$ 1 - \binom{100}{2} 0.1^2 * 0.9^{100-2} - \binom{100}{1} 0.1^1 * 0.9^{100-1} - \binom{100}{0} 0.1^0 * 0.9^{100-0}$$
+```{r}
+1 - pbinom(2, size=100, prob=0.1)
+```
     
       
 **5. A phone center receives 15 calls every 30 minutes.**  
 a) If X is the number of phone calls in 30 minutes, give the poisson probability mass
 function for X.  
+$$ \frac{15^X e^{-15}}{X!}$$
 b) What is the probability that there will be exactly 10 phone calls in the first 30
-minutes and exactly 20 phone calls in the second 30 minutes.  
+minutes and exactly 20 phone calls in the second 30 minutes.
+$$ \frac{15^{10} e^{-15}}{10!} * \frac{15^{20} e^{-15}}{20!} $$
+```{r}
+dpois(10, lambda = 15) * dpois(10, lambda = 15)
+```

@@ -20,7 +20,7 @@ Find the E[X] and Var[X]
 k = 4, given the table above then:   
 $$ E[X] = \sum_{k = 0}^{4} kp(k) -> 0*0.1 + 1*0.2 + 2*0.4 + 3*0.2 + 4*0.1 = 2 $$
 $$ E[x] = n*p -> 2 = 4 * p  -> p = 0.5$$
-$$ Var[x] = n*p*(1-p) -> 4*0.5 *(1 - 0.5) -> Var[x] = 1$$
+$$ Var[x] = n*p*(1-p) -> 4*0.5 *(1 - 0.5) -> Var[x] = 1$$ //TODO WATCH 20:00 to 23:00
 2.  The probability mass function of a discrete random variable X is given in the following table:
 
     **x | -2  | -1 | 0  | 1 | 2
@@ -29,7 +29,7 @@ $$ Var[x] = n*p*(1-p) -> 4*0.5 *(1 - 0.5) -> Var[x] = 1$$
 Show that p3 = 0.2 and calculate the E[X].
 
 $$ p3 = 1 - (p(-2) + P(-1) + P(0) + P(2)) = 1 - (0.1 + 0.3 +  0.3 + 0.1) = 1 - 0.8 = 0.2  $$
-$$ E[X] = \sum_{k = -2}^{2} kp(k) -> -2*0.1 - 1*0.3 + 0*0.3 + 1*0.2 + 2*0.1 = 0.3 $$
+$$ E[X] = \sum_{k = -2}^{2} kp(k) -> -2*0.1 - 1*0.3 + 0*0.3 + 1*0.2 + 2*0.1 = -0.1 $$
   
   
 3. 20% of the Irish population watched Ireland beat France in the Rugby World Cup. A
