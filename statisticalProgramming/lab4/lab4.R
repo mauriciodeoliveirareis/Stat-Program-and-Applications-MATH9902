@@ -1,9 +1,8 @@
-printPlots <- function(x, p_x, F_x) {
+printPlots <- function(x, p_x, cdf) {
   par(mfrow = c(1, 2))
   
-  plot(p_x, lwd = 3, type = 'h', main = 'pmf of X', ylab = 'p(x)')
+  plot(x, p_x, lwd = 3, type = 'h', main = 'pmf of X', ylab = 'p(x)')
   
-  cdf <- stepfun(x, c(0, F_x))
   plot.stepfun(cdf, verticals = FALSE, do.points = TRUE, 
                pch = 16, lwd = 3,
                main = 'cdf of X',
@@ -17,8 +16,10 @@ calculateFeaturesOfUniformDistribution <- function(x = 1:5, p_x = rep(0.2, 5), p
   sumOfAllProbabilities <- tail(F_x, n=1)  
   if(sumOfAllProbabilities != 1) stop("Probabilities must add up to 1")
   
+  cdf <- stepfun(x, c(0, F_x))
+  
   if(printPlots) {
-    printPlots(x, p_x, F_x)
+    printPlots(x, p_x, cdf)
   }
   
   E_X <- c(x %*% p_x) 
@@ -26,7 +27,8 @@ calculateFeaturesOfUniformDistribution <- function(x = 1:5, p_x = rep(0.2, 5), p
   
   list(E_X = E_X,
        Var_X = Var_X,
-       F_x = F_x)
+       F_x = F_x,
+       cdf = cdf)
 }
 #testing all scenarios for Task one:
 calculateFeaturesOfUniformDistribution() # default call
@@ -36,9 +38,9 @@ calculateFeaturesOfUniformDistribution(c(1:5), rep(0.3,5)) #prob must add up to 
 #Task 2
 t2_px <- c(0.2,0.1,0.3,0.15,0.25)
 t2_result<- calculateFeaturesOfUniformDistribution(c(1:5), t2_px, TRUE)
-probXSmallerThan3 <- t2_result$cdf[3]
-probXSmallerThan2OrXIs4 <- t2_result$cdf[2] + t2_px[4]
-probXEqualTo3GivenXSmallerThan4 <- t2_px[2] / t2_result$cdf[4]
+probXSmallerThan3 <- t2_result$cdf(3)
+probXSmallerThan2OrXIs4 <- t2_result$cdf(2) + t2_px[4]
+probXEqualTo3GivenXSmallerOrEqualTo4 <- t2_px[3] / t2_result$cdf(4)
 
 print(t2_result)
 print(probXSmallerThan3)

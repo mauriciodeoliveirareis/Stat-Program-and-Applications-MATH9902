@@ -1,0 +1,32 @@
+---
+title: "Central Limit Theorem"
+author: "John S Butler"
+date: "5 November 2015"
+output: html_document
+runtime: shiny
+---
+
+
+
+```{r, echo=FALSE}
+inputPanel(
+  selectInput("n_avg", label = "Number ins average:",
+              choices = c(1,2, 4, 10, 50), selected = 1),
+  
+  sliderInput("Repitions", label = "Number of repeats:",
+              min = 1000, max = 10000, value = 1000, step = 10)
+)
+
+
+
+renderPlot({
+  r<-0
+for(i in 1:input$Repitions) 
+{r[i]<-mean(runif(input$n_avg))
+}
+h<-hist(r)
+h$counts=h$counts/sum(h$counts)
+plot(h)
+})
+```
+

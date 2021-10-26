@@ -1,0 +1,21 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+
+**Miscellaneous Rmd samples**
+```{r setup, include=FALSE}
+
+```
+
+
+$$\left(\int_{a}^{b} f(x) \; dx\right) $$
+
+$$
+\begin{aligned}
+ P(x): & 0.22 & if x = 1 \\
+       & 0.30 & if x = 2 \\
+       & 0.26 & if x = 3
+\end{aligned}
+$$

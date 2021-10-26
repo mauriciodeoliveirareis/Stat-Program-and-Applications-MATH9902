@@ -10,12 +10,8 @@ ConditionalDieProbablity <- function(d1, s) {
   #If d1 5 and s = 7
   #P(d1 = 5 ∩ s = 7) / P(S = 7)
   sum(R$D_1 == d1 & R$S == s) / sum(R$S == s)
-  
-  
-  
 }
 
 set.seed(7)
 condProb <- ConditionalDieProbablity(5,11)
-#TODO: This doesn't seem right, I was expecting 1/6 or 0 here
 condProb
