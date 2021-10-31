@@ -13,15 +13,23 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE, cache = TRUE)
 <br>
 
 ### Two dice $D_1$ and $D_2$ are rolled and let $S$ be the sum $S = D_1 + D_2.$
-
+```{r}
+# Exercise setup:
+die1 <- c(1:6)
+die2 <- c(1:6)
+rolls <- expand.grid(die1, die2)
+R <- data.frame(rolls, rowSums(rolls))
+colnames(R) <- c("D_1", "D_2", "S")
+totalDifferentRolls <- dim(R)[1]
+```
 #### 1. Find $\Pr(D_1 < 4\ \cup\ S > 9)$ [**10 marks**]
 ```{r}
-# insert code
+sum(R$D_1 < 4 | R$S > 9) / totalDifferentRolls
 ```
 
 #### 2. Find $\Pr(D_1 < 4\ |\ S = 8)$ [**10 marks**]
 ```{r}
-# insert code
+sum(R$D_1 < 4 & R$S == 8) / sum(R$S == 8)
 ```
 
 ### Suppose $X \sim Binomial(n = 10, p = 0.3).$
@@ -29,11 +37,30 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE, cache = TRUE)
 #### 3. Find $\Pr(X \le 6 \cap 2 < X < 8).$ [**10 marks**]
 ```{r}
 # insert code
+xSmallerOrEqualToSix <- c(1:6)
+xBetweenTwoAndEight<- c(3:7)
+intersectionEx3 <- intersect(xSmallerOrEqualToSix, xBetweenTwoAndEight)
+ex3Answer <- 0
+for (xValue in intersectionEx3) {
+  ex3Answer <- ex3Answer + dbinom(xValue, size = 10, prob = 0.3)
+}
+print(ex3Answer)
+
+#TODO: Or should I do?
+pbinom(6, size = 10, prob = 0.3) * (pbinom(7, size = 10, prob = 0.3) - pbinom(2,size = 10, prob = 0.3))
 ```
 
 #### 4. Find $\Pr(X < 4\ |\ X \le 6).$ [**10 marks**]
 ```{r}
-# insert code
+xSmallerThanFour <- c(1:3)
+xSmallerOrEqualToSix <- c(1:6)
+intersectionEx4 <- intersect(xSmallerThanFour, xSmallerOrEqualToSix)
+intersectionProb <- 0
+for (xValue in intersectionEx4) {
+  intersectionProb <- intersectionProb + dbinom(xValue, size = 10, prob = 0.3)
+}
+xSmallerOrEqualToSixProb <- pbinom(6, size = 10, prob = 0.3)
+intersectionProb / xSmallerOrEqualToSixProb
 ```
 
 ### Suppose $X \sim Poisson(\lambda = 5).$

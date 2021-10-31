@@ -222,13 +222,29 @@ pre code {
 <p><br></p>
 <div id="two-dice-d_1-and-d_2-are-rolled-and-let-s-be-the-sum-s-d_1-d_2." class="section level3">
 <h3>Two dice <span class="math inline">\(D_1\)</span> and <span class="math inline">\(D_2\)</span> are rolled and let <span class="math inline">\(S\)</span> be the sum <span class="math inline">\(S = D_1 + D_2.\)</span></h3>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBFeGVyY2lzZSBzZXR1cDpcbmRpZTEgPC0gYygxOjYpXG5kaWUyIDwtIGMoMTo2KVxucm9sbHMgPC0gZXhwYW5kLmdyaWQoZGllMSwgZGllMilcblIgPC0gZGF0YS5mcmFtZShyb2xscywgcm93U3Vtcyhyb2xscykpXG5jb2xuYW1lcyhSKSA8LSBjKFwiRF8xXCIsIFwiRF8yXCIsIFwiU1wiKVxudG90YWxEaWZmZXJlbnRSb2xscyA8LSBkaW0oUilbMV1cbmBgYCJ9 -->
+<pre class="r"><code># Exercise setup:
+die1 &lt;- c(1:6)
+die2 &lt;- c(1:6)
+rolls &lt;- expand.grid(die1, die2)
+R &lt;- data.frame(rolls, rowSums(rolls))
+colnames(R) &lt;- c(&quot;D_1&quot;, &quot;D_2&quot;, &quot;S&quot;)
+totalDifferentRolls &lt;- dim(R)[1]</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
 <div id="find-prd_1-4-cup-s-9-10-marks" class="section level4">
 <h4>1. Find <span class="math inline">\(\Pr(D_1 &lt; 4\ \cup\ S &gt; 9)\)</span> [<strong>10 marks</strong>]</h4>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBpbnNlcnQgY29kZVxuYGBgIn0= -->
-<pre class="r"><code># insert code</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtKFIkRF8xIDwgNCB8IFIkUyA+IDkpIC8gdG90YWxEaWZmZXJlbnRSb2xsc1xuYGBgIn0= -->
+<pre class="r"><code>sum(R$D_1 &lt; 4 | R$S &gt; 9) / totalDifferentRolls</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDAuNjY2NjY2N1xuIn0= -->
+<pre><code>[1] 0.6666667</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -236,9 +252,12 @@ pre code {
 <h4>2. Find <span class="math inline">\(\Pr(D_1 &lt; 4\ |\ S = 8)\)</span> [<strong>10 marks</strong>]</h4>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBpbnNlcnQgY29kZVxuYGBgIn0= -->
-<pre class="r"><code># insert code</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtKFIkRF8xIDwgNCAmIFIkUyA9PSA4KSAvIHN1bShSJFMgPT0gOClcbmBgYCJ9 -->
+<pre class="r"><code>sum(R$D_1 &lt; 4 &amp; R$S == 8) / sum(R$S == 8)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDAuNFxuIn0= -->
+<pre><code>[1] 0.4</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -249,9 +268,20 @@ pre code {
 <h4>3. Find <span class="math inline">\(\Pr(X \le 6 \cap 2 &lt; X &lt; 8).\)</span> [<strong>10 marks</strong>]</h4>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBpbnNlcnQgY29kZVxuYGBgIn0= -->
-<pre class="r"><code># insert code</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBpbnNlcnQgY29kZVxueFNtYWxsZXJPckVxdWFsVG9TaXggPC0gYygxOjYpXG54QmV0d2VlblR3b0FuZEVpZ2h0PC0gYygzOjcpXG5pbnRlcnNlY3Rpb25FeDMgPC0gaW50ZXJzZWN0KHhTbWFsbGVyT3JFcXVhbFRvU2l4LCB4QmV0d2VlblR3b0FuZEVpZ2h0KVxuZXgzQW5zd2VyIDwtIDBcbmZvciAoeFZhbHVlIGluIGludGVyc2VjdGlvbkV4Mykge1xuICBleDNBbnN3ZXIgPC0gZXgzQW5zd2VyICsgZGJpbm9tKHhWYWx1ZSwgc2l6ZSA9IDEwLCBwcm9iID0gMC4zKVxufVxuZXgzQW5zd2VyXG5gYGAifQ== -->
+<pre class="r"><code># insert code
+xSmallerOrEqualToSix &lt;- c(1:6)
+xBetweenTwoAndEight&lt;- c(3:7)
+intersectionEx3 &lt;- intersect(xSmallerOrEqualToSix, xBetweenTwoAndEight)
+ex3Answer &lt;- 0
+for (xValue in intersectionEx3) {
+  ex3Answer &lt;- ex3Answer + dbinom(xValue, size = 10, prob = 0.3)
+}
+ex3Answer</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDAuNjA2NjI1MVxuIn0= -->
+<pre><code>[1] 0.6066251</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -259,9 +289,20 @@ pre code {
 <h4>4. Find <span class="math inline">\(\Pr(X &lt; 4\ |\ X \le 6).\)</span> [<strong>10 marks</strong>]</h4>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBpbnNlcnQgY29kZVxuYGBgIn0= -->
-<pre class="r"><code># insert code</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxueFNtYWxsZXJUaGFuRm91ciA8LSBjKDE6MylcbnhTbWFsbGVyT3JFcXVhbFRvU2l4IDwtIGMoMTo2KVxuaW50ZXJzZWN0aW9uRXg0IDwtIGludGVyc2VjdCh4U21hbGxlclRoYW5Gb3VyLCB4U21hbGxlck9yRXF1YWxUb1NpeClcbmludGVyc2VjdGlvblByb2IgPC0gMFxuZm9yICh4VmFsdWUgaW4gaW50ZXJzZWN0aW9uRXg0KSB7XG4gIGludGVyc2VjdGlvblByb2IgPC0gaW50ZXJzZWN0aW9uUHJvYiArIGRiaW5vbSh4VmFsdWUsIHNpemUgPSAxMCwgcHJvYiA9IDAuMylcbn1cbnhTbWFsbGVyT3JFcXVhbFRvU2l4UHJvYiA8LSBwYmlub20oNiwgc2l6ZSA9IDEwLCBwcm9iID0gMC4zKVxuaW50ZXJzZWN0aW9uUHJvYiAvIHhTbWFsbGVyT3JFcXVhbFRvU2l4UHJvYlxuYGBgIn0= -->
+<pre class="r"><code>xSmallerThanFour &lt;- c(1:3)
+xSmallerOrEqualToSix &lt;- c(1:6)
+intersectionEx4 &lt;- intersect(xSmallerThanFour, xSmallerOrEqualToSix)
+intersectionProb &lt;- 0
+for (xValue in intersectionEx4) {
+  intersectionProb &lt;- intersectionProb + dbinom(xValue, size = 10, prob = 0.3)
+}
+xSmallerOrEqualToSixProb &lt;- pbinom(6, size = 10, prob = 0.3)
+intersectionProb / xSmallerOrEqualToSixProb</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDAuNjI4MDE1MlxuIn0= -->
+<pre><code>[1] 0.6280152</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -307,7 +348,7 @@ pre code {
 <!-- rnb-text-end -->
 </div>
 
-<div id="rmd-source-code">LS0tCmh0bWxfZG9jdW1lbnQ6CiAgbWF0aGpheDogaHR0cDovL2Nkbi5tYXRoamF4Lm9yZy9tYXRoamF4L2xhdGVzdC9NYXRoSmF4LmpzP2NvbmZpZz1UZVgtQU1TLU1NTF9IVE1Mb3JNTUwKb3V0cHV0OiBodG1sX25vdGVib29rCnRpdGxlOiAiQXNzaWdubWVudCAxIgphdXRob3I6ICJNYXVyaWNpbyBSZWlzIHwgMDAwMDAwMCIKLS0tCgpgYGB7ciBzZXR1cCwgaW5jbHVkZT1GQUxTRX0Ka25pdHI6Om9wdHNfY2h1bmskc2V0KGVjaG8gPSBUUlVFLCBldmFsID0gVFJVRSwgY2FjaGUgPSBUUlVFKQpgYGAKCjxicj4KCiMjIyBUd28gZGljZSAkRF8xJCBhbmQgJERfMiQgYXJlIHJvbGxlZCBhbmQgbGV0ICRTJCBiZSB0aGUgc3VtICRTID0gRF8xICsgRF8yLiQKCiMjIyMgMS4gRmluZCAkXFByKERfMSA8IDRcIFxjdXBcIFMgPiA5KSQgWyoqMTAgbWFya3MqKl0KYGBge3J9CiMgaW5zZXJ0IGNvZGUKYGBgCgojIyMjIDIuIEZpbmQgJFxQcihEXzEgPCA0XCB8XCBTID0gOCkkIFsqKjEwIG1hcmtzKipdCmBgYHtyfQojIGluc2VydCBjb2RlCmBgYAoKIyMjIFN1cHBvc2UgJFggXHNpbSBCaW5vbWlhbChuID0gMTAsIHAgPSAwLjMpLiQKCiMjIyMgMy4gRmluZCAkXFByKFggXGxlIDYgXGNhcCAyIDwgWCA8IDgpLiQgWyoqMTAgbWFya3MqKl0KYGBge3J9CiMgaW5zZXJ0IGNvZGUKYGBgCgojIyMjIDQuIEZpbmQgJFxQcihYIDwgNFwgfFwgWCBcbGUgNikuJCBbKioxMCBtYXJrcyoqXQpgYGB7cn0KIyBpbnNlcnQgY29kZQpgYGAKCiMjIyBTdXBwb3NlICRYIFxzaW0gUG9pc3NvbihcbGFtYmRhID0gNSkuJAoKIyMjIyA1LiBGaW5kICRcUHIoMyA8IFggXGxlIDcpLiQgWyoqMTAgbWFya3MqKl0KYGBge3J9CiMgaW5zZXJ0IGNvZGUKYGBgCgojIyMjIDYuIEZpbmQgJFxQcihYIDwgMyBcY3VwIFggXGdlIDcpLiQgWyoqMTAgbWFya3MqKl0KYGBge3J9CiMgaW5zZXJ0IGNvZGUKYGBgCgojIyMgQ3JlYXRlIGEgZnVuY3Rpb24gWyoqNDAgbWFya3MqKl0KClN1cHBvc2UgJFggXHNpbSBQb2lzc29uKFxsYW1iZGEpLiQgQ3JlYXRlIGEgZnVuY3Rpb24gd2hpY2ggcGxvdHMgdGhlIHBtZiBhbmQgY2RmIGZvciB0aGUgaW50ZXJ2YWwgJFt4XzEgLSA1LCB4XzEgKyA1XSQgYW5kIGNhbGN1bGF0ZSB0aGUgJHAoeF8xKSQgYW5kICRGKHhfMSkkIGZvciBhIGdpdmVuIHZhbHVlIG9mICR4XzEuJAoKKiBJbnB1dDogJHhfMSQgYW5kICRcbGFtYmRhOyQKKiBPdXRwdXQ6ICRwKHhfMSkkIGFuZCAkRih4XzEpJAoqIEV4dHJhIGZlYXR1cmU6IHN0b3AgdGhlIGZ1bmN0aW9uIGlmICRcbGFtYmRhJCBpcyBuZWdhdGl2ZSBhbmQgcHJpbnQgYSB3YXJuaW5nIG1lc3NhZ2UuIApbKio0MCBtYXJrcyoqXQpgYGB7cn0KIyBpbnNlcnQgY29kZQpgYGAKCgoK</div>
+<div id="rmd-source-code">LS0tCmh0bWxfZG9jdW1lbnQ6CiAgbWF0aGpheDogaHR0cDovL2Nkbi5tYXRoamF4Lm9yZy9tYXRoamF4L2xhdGVzdC9NYXRoSmF4LmpzP2NvbmZpZz1UZVgtQU1TLU1NTF9IVE1Mb3JNTUwKb3V0cHV0OiBodG1sX25vdGVib29rCnRpdGxlOiAiQXNzaWdubWVudCAxIgphdXRob3I6ICJNYXVyaWNpbyBSZWlzIHwgMDAwMDAwMCIKLS0tCgpgYGB7ciBzZXR1cCwgaW5jbHVkZT1GQUxTRX0Ka25pdHI6Om9wdHNfY2h1bmskc2V0KGVjaG8gPSBUUlVFLCBldmFsID0gVFJVRSwgY2FjaGUgPSBUUlVFKQpgYGAKCjxicj4KCiMjIyBUd28gZGljZSAkRF8xJCBhbmQgJERfMiQgYXJlIHJvbGxlZCBhbmQgbGV0ICRTJCBiZSB0aGUgc3VtICRTID0gRF8xICsgRF8yLiQKYGBge3J9CiMgRXhlcmNpc2Ugc2V0dXA6CmRpZTEgPC0gYygxOjYpCmRpZTIgPC0gYygxOjYpCnJvbGxzIDwtIGV4cGFuZC5ncmlkKGRpZTEsIGRpZTIpClIgPC0gZGF0YS5mcmFtZShyb2xscywgcm93U3Vtcyhyb2xscykpCmNvbG5hbWVzKFIpIDwtIGMoIkRfMSIsICJEXzIiLCAiUyIpCnRvdGFsRGlmZmVyZW50Um9sbHMgPC0gZGltKFIpWzFdCmBgYAojIyMjIDEuIEZpbmQgJFxQcihEXzEgPCA0XCBcY3VwXCBTID4gOSkkIFsqKjEwIG1hcmtzKipdCmBgYHtyfQpzdW0oUiREXzEgPCA0IHwgUiRTID4gOSkgLyB0b3RhbERpZmZlcmVudFJvbGxzCmBgYAoKIyMjIyAyLiBGaW5kICRcUHIoRF8xIDwgNFwgfFwgUyA9IDgpJCBbKioxMCBtYXJrcyoqXQpgYGB7cn0Kc3VtKFIkRF8xIDwgNCAmIFIkUyA9PSA4KSAvIHN1bShSJFMgPT0gOCkKYGBgCgojIyMgU3VwcG9zZSAkWCBcc2ltIEJpbm9taWFsKG4gPSAxMCwgcCA9IDAuMykuJAoKIyMjIyAzLiBGaW5kICRcUHIoWCBcbGUgNiBcY2FwIDIgPCBYIDwgOCkuJCBbKioxMCBtYXJrcyoqXQpgYGB7cn0KIyBpbnNlcnQgY29kZQp4U21hbGxlck9yRXF1YWxUb1NpeCA8LSBjKDE6NikKeEJldHdlZW5Ud29BbmRFaWdodDwtIGMoMzo3KQppbnRlcnNlY3Rpb25FeDMgPC0gaW50ZXJzZWN0KHhTbWFsbGVyT3JFcXVhbFRvU2l4LCB4QmV0d2VlblR3b0FuZEVpZ2h0KQpleDNBbnN3ZXIgPC0gMApmb3IgKHhWYWx1ZSBpbiBpbnRlcnNlY3Rpb25FeDMpIHsKICBleDNBbnN3ZXIgPC0gZXgzQW5zd2VyICsgZGJpbm9tKHhWYWx1ZSwgc2l6ZSA9IDEwLCBwcm9iID0gMC4zKQp9CnByaW50KGV4M0Fuc3dlcikKCiNUT0RPOiBPciBzaG91bGQgSSBkbz8KcGJpbm9tKDYsIHNpemUgPSAxMCwgcHJvYiA9IDAuMykgKiAocGJpbm9tKDcsIHNpemUgPSAxMCwgcHJvYiA9IDAuMykgLSBwYmlub20oMixzaXplID0gMTAsIHByb2IgPSAwLjMpKQpgYGAKCiMjIyMgNC4gRmluZCAkXFByKFggPCA0XCB8XCBYIFxsZSA2KS4kIFsqKjEwIG1hcmtzKipdCmBgYHtyfQp4U21hbGxlclRoYW5Gb3VyIDwtIGMoMTozKQp4U21hbGxlck9yRXF1YWxUb1NpeCA8LSBjKDE6NikKaW50ZXJzZWN0aW9uRXg0IDwtIGludGVyc2VjdCh4U21hbGxlclRoYW5Gb3VyLCB4U21hbGxlck9yRXF1YWxUb1NpeCkKaW50ZXJzZWN0aW9uUHJvYiA8LSAwCmZvciAoeFZhbHVlIGluIGludGVyc2VjdGlvbkV4NCkgewogIGludGVyc2VjdGlvblByb2IgPC0gaW50ZXJzZWN0aW9uUHJvYiArIGRiaW5vbSh4VmFsdWUsIHNpemUgPSAxMCwgcHJvYiA9IDAuMykKfQp4U21hbGxlck9yRXF1YWxUb1NpeFByb2IgPC0gcGJpbm9tKDYsIHNpemUgPSAxMCwgcHJvYiA9IDAuMykKaW50ZXJzZWN0aW9uUHJvYiAvIHhTbWFsbGVyT3JFcXVhbFRvU2l4UHJvYgpgYGAKCiMjIyBTdXBwb3NlICRYIFxzaW0gUG9pc3NvbihcbGFtYmRhID0gNSkuJAoKIyMjIyA1LiBGaW5kICRcUHIoMyA8IFggXGxlIDcpLiQgWyoqMTAgbWFya3MqKl0KYGBge3J9CiMgaW5zZXJ0IGNvZGUKYGBgCgojIyMjIDYuIEZpbmQgJFxQcihYIDwgMyBcY3VwIFggXGdlIDcpLiQgWyoqMTAgbWFya3MqKl0KYGBge3J9CiMgaW5zZXJ0IGNvZGUKYGBgCgojIyMgQ3JlYXRlIGEgZnVuY3Rpb24gWyoqNDAgbWFya3MqKl0KClN1cHBvc2UgJFggXHNpbSBQb2lzc29uKFxsYW1iZGEpLiQgQ3JlYXRlIGEgZnVuY3Rpb24gd2hpY2ggcGxvdHMgdGhlIHBtZiBhbmQgY2RmIGZvciB0aGUgaW50ZXJ2YWwgJFt4XzEgLSA1LCB4XzEgKyA1XSQgYW5kIGNhbGN1bGF0ZSB0aGUgJHAoeF8xKSQgYW5kICRGKHhfMSkkIGZvciBhIGdpdmVuIHZhbHVlIG9mICR4XzEuJAoKKiBJbnB1dDogJHhfMSQgYW5kICRcbGFtYmRhOyQKKiBPdXRwdXQ6ICRwKHhfMSkkIGFuZCAkRih4XzEpJAoqIEV4dHJhIGZlYXR1cmU6IHN0b3AgdGhlIGZ1bmN0aW9uIGlmICRcbGFtYmRhJCBpcyBuZWdhdGl2ZSBhbmQgcHJpbnQgYSB3YXJuaW5nIG1lc3NhZ2UuIApbKio0MCBtYXJrcyoqXQpgYGB7cn0KIyBpbnNlcnQgY29kZQpgYGAKCgoK</div>
 
 
 
