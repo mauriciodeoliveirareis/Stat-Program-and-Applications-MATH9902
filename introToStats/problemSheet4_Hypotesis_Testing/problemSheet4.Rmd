@@ -1,7 +1,7 @@
 ---
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 **Hypothesis Testing - Z-test**
@@ -12,7 +12,7 @@ library("asbio")
 1.  To investigate climate change meteorologists in Ireland, wish to examine the rain- fall in November. They have established that the normal mean daily rain fall in November is 2.35 mm. They observed rainfall for the 30 days of November in 2015 and recorded a mean rainfall of 4.05mm and a standard deviation of 2.25mm.
 
     Conduct a hypothesis test to determine if the observed data from November 2015
-    gives evidence (α = 0.01) that there is a change in rainfall.
+    gives evidence ($H_\alpha=$ = 0.01) that there is a change in rainfall.
     
 $H_0=$ "The average daily rainfall is in Ireland is 2.35mm"  
 $H_\alpha=$"There has been a change on rainfall in Ireland"
@@ -25,14 +25,14 @@ dsZ$test[1]$`z*`
 ```
 Conclusion: There has been an increase in rainfall in Ireland  
   
-  
+---
 
 2.  Researchers wished to investigate differences in TV viewing practices between
     children in Ireland versus America. The researchers established that the mean TV
     viewing per week is 30.5 hours for American children. They observed 115 Irish children for a week and recorded a mean TV viewing of 28 hours and a standard deviation of 2.5 hours.
 
     Conduct a hypothesis test to determine if the observed data gives evidence that Irish
-    children watch less TV than American children (α = 0.05).  
+    children watch less TV than American children ($H_\alpha=$ = 0.05).  
     
 $H_0=$ "The average TV viewing by american child, per week, is 30.5 hours **(nearly equivalent to watch 3 times the Lord of the Rings Trilogy Extended!)**"  
 ![LOTR Child](./lotrChildImage.jpeg){width=20%}
@@ -49,7 +49,8 @@ dsZ$test[1]$`z*`
 
 Conclusion: Irish children watch less TV than american children  
   
-
+---
+  
 3.  The CEO of a large electric utility claims that 80 percent of his customers are very satisfied with the service they receive. To test this claim, the local newspaper surveyed 140 customers, using simple random sampling. Among the sampled customers, 73 percent say they are very satisfied.
 
     Based on these findings, can we reject the CEO's hypothesis that 80% of the customers are very satisfied? Use a 0.05 level of significance.
@@ -64,11 +65,12 @@ $$ standardError = \frac{0.73 * (1-0.73)}{140} -> 0.0375$$
 $$ z = \frac{73-80}{0.0375} -> -186.56$$  
 Conclusion: There is strong evidence that less than 80 percent of utility customers are very satisfied  
   
-  
+---
+
 4. A four-sided (tetrahedral) die is tossed 1000 times, and 290 fours are observed. Is there evidence to conclude that the die is biased, that is, say, that more fours than expected are observed?
 
     Conduct a hypothesis test to determine if the observed data gives evidence that the
-    die is fair (α = 0.05).  
+    die is fair ($H_\alpha=$ = 0.05).  
 $H_0=$ "This is not a fair die."  
 $H_\alpha=$"This is a fair die."
 
