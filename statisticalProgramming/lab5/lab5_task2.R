@@ -1,9 +1,9 @@
-calculatePoisson <- function(n,lambda, printPlots = FALSE) {
+calculatePoisson <- function(l,u,lambda, printPlots = FALSE) {
+  if (lambda <=0) stop("lambda must be positive")
   
-  n <- 15 # arbitrary maximum number of cars considered
-  lambda <- 5
-  x <- 0:n
+  x <- l:u
   p_x <- dpois(x, lambda = lambda)
+  #TODO Take a look into this, cdf is certanly not well calculated
   F_x <- ppois(x, lambda = lambda)
   
   cdf <- stepfun(x, c(0, F_x))
@@ -27,4 +27,4 @@ calculatePoisson <- function(n,lambda, printPlots = FALSE) {
        p_x = p_x)
 }
 
-calculatePoisson(100,5, TRUE)
+calculatePoisson(0,10,5, TRUE)
