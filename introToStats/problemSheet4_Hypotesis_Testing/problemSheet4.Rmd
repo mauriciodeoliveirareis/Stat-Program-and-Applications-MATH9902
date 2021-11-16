@@ -1,7 +1,7 @@
 ---
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 **Hypothesis Testing - Z-test**
@@ -38,7 +38,7 @@ $H_0=$ "The average TV viewing by american child, per week, is 30.5 hours **(nea
 ![LOTR Child](./lotrChildImage.jpeg){width=20%}
 $H_\alpha=$"Irish Children watch less TV"  
 
-$$ \mu_0 = 30.5, n=115, \overline{x} = 28, s=2.5, \alpha=0.05, zAlpha=1.96 $$  
+$$ \mu_0 = 30.5, n=115, \overline{x} = 28, s=2.5, \alpha=0.05, zAlpha=1.644 $$  
 $$ z = \frac{28-30.5}{\frac{2.5}{\sqrt{115}}} -> -10.7238$$  
 
 ```{r}
@@ -56,13 +56,13 @@ Conclusion: Irish children watch less TV than american children
     Based on these findings, can we reject the CEO's hypothesis that 80% of the customers are very satisfied? Use a 0.05 level of significance.
 
 $H_0=$ "80% of electric utility customers are very satisfied."  
-$H_\alpha=$"Less than 80 percent of utility customers are very satisfied."
+$H_\alpha=$"A number different from 80 percent of utility customers are very satisfied."
 
 $$ \mu_0 = 80, n=140, \overline{x} = 73, \alpha=0.05, zAlpha=1.96 $$  
 $\color{red}{\text{TODO Question: Can I actually this this below? Z score seems quite high...}}$
 
-$$ standardError = \frac{0.73 * (1-0.73)}{140} -> 0.0375$$
-$$ z = \frac{73-80}{0.0375} -> -186.56$$  
+$$ standardError = \sqrt{\frac{0.8 * (1-0.8)}{140}} -> 0.0338$$
+$$ z = \frac{0.73-0.80}{0.0338} -> -2.071$$  
 Conclusion: There is strong evidence that less than 80 percent of utility customers are very satisfied  
   
 ---
@@ -77,8 +77,8 @@ $H_\alpha=$"This is a fair die."
 $$ \mu_0 = 1000*0.25-> 250$$
 $$n=140, \overline{x} = 73, \alpha=0.05, zAlpha=1.96 $$  
 $\color{red}{\text{TODO Question: I still quite unsure if this is right...}}$
-$$ standardError = \frac{0.25 * (1-0.75)}{1000} -> 0.01369$$
+$$ standardError = \sqrt{\frac{0.25 * (1-0.25)}{1000}} -> 0.01369$$
 
-$$ z = \frac{290-250}{0.0.01369} -> 2921.186$$  
+$$ z = \frac{0.29-0.25}{0.01369} -> 2.92$$  
 
 Conclusion: The die is not fair
