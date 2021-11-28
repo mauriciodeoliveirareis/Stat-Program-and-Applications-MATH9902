@@ -16,7 +16,8 @@ calculateConditionalNormal <- function(x1=-0.5, x2=0.5, mu = 0, sigmaSq = 1, pri
   
   xSmallerThanX2 <- pnorm(x2, mu, sigma)
   xSmallerThanX1 <- pnorm(x1, mu, sigma)
-  xSmallerThanX1GivenX2 = (xSmallerThanX1 * xSmallerThanX2) / xSmallerThanX2
+  #Since X<x1 is a subset of X<x2 then  P(X<x1 ∩ X<x2) == P(X<x1)
+  xSmallerThanX1GivenX2 <- xSmallerThanX1 / xSmallerThanX2
   xSmallerThanX1GivenX2
 }
 
