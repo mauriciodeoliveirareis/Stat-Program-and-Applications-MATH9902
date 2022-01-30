@@ -1,0 +1,100 @@
+---
+html_document:
+  mathjax: http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+author: "Mauricio de Oliveira Reis | D21125621"
+title: "Assignment 2"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, cache = TRUE)
+```
+
+<br>
+
+### Suppose $X$ is a continuous r.v. with pdf: $f(x) = 3x^2, \ -1 < x < 0.$
+
+#### 1. Plot the pdf of $X$ and verify that $f(x)$ is a pdf. [**10 marks**]
+```{r}
+f_x <- function(x) 3 * (x^2)
+curve(f_x, from = -1, to = 0, ylab = 'f(x)', 
+      main = 'pdf of X', lwd = 3)
+f_all <- integrate(f_x, lower = -1, upper = 0)
+if(f_all$value == 1) {
+  print("Question 1 answer is: this is a pdf")
+} else print("Question 1 answer is: this is NOT a pdf")
+```
+
+#### 2. Find $\Pr(X < -0.6\ |\ X > -0.8)$ [**10 marks**]
+$$ X < -0.6\ \cap  X > -0.8 = -0.8 < X < -0.6  $$ 
+```{r}
+F_Between0.8And0.6 <- integrate(f_x, lower = -0.8, upper = -0.6)$value
+F_Bigger_Minus_0.8 <- integrate(f_x, lower = -0.8, upper = 0)$value
+answer <- F_Between0.8And0.6 / F_Bigger_Minus_0.8
+paste("Question 2 answer is:", answer)
+```
+
+#### 3. Find the expectation of $X.$ [**10 marks**]
+```{r}
+# insert code
+x.f_x <- function(x) x * 3 * (x^2)
+E_X <- integrate(x.f_x, lower = -1, upper = 0)$value
+paste("Question 3 answer is the expectation is:", E_X)
+```
+
+#### 4. Find the variance of $X.$ [**10 marks**]
+```{r}
+x2.f_x <- function(x) (x^2) * 3 * (x^2)
+E_X2 <- integrate(x2.f_x, lower = -1, upper = 0)$value
+Var_X <- E_X2 - E_X^2
+paste("Question 4 answer is the variance is:", Var_X)
+```
+
+### Suppose $X \sim \mathcal{N}(\mu = 3, \sigma^2 = 10).$
+
+#### 5. Find $\Pr(X < 4\ |\ X > 1).$ [**10 marks**]
+$$ X < 4 \cap  X > 1 = 1 < X < 4  $$ 
+```{r}
+mu <- 3
+sigma2 <- 10
+sigma <- sqrt(sigma2)
+x_between_1_and_4 <- pnorm(4, mu, sigma) - pnorm(1, mu, sigma)
+x_bigger_1 <- pnorm(1, mu, sigma, lower.tail = FALSE)
+
+answer <- x_between_1_and_4 / x_bigger_1
+paste("Question 5 answer is:", answer)
+```
+
+#### 6. Find $x_1$ such that: $\Pr(X > x_1) = 0.13.$ [**10 marks**]
+```{r}
+qnorm(0.13, mu, sigma, lower.tail = FALSE)
+```
+
+### Statistical inference [**40 marks**]
+
+The width of bolts of fabric is normally distributed with a mean of 950 mm and a standard deviation of 100 mm. 
+
+Sample data of 500 bolt widths has been collected here: https://acaimo.github.io/teaching/statistical_programming/ca/bwidth.RData
+
+Import the data and estimate the $95\%$ confidence interval for $\mu$ and $\sigma^2.$
+```{r}
+load(url("https://acaimo.github.io/teaching/statistical_programming/ca/bwidth.RData"))
+sample <- bwidth
+n <- length(sample)
+# To calculate conf interval of the mean
+xbar <- mean(sample)
+se <- sd(sample) / sqrt(n)
+alpha <- 0.05
+L <- xbar - qt(1 - alpha / 2, n - 1) * se
+U <- xbar + qt(1 - alpha / 2, n - 1) * se
+print(paste("Conf interval for mean is:", L, "and", U))
+
+# To calculate conf. interval of the variance 
+s2 <- var(sample)
+L <- ((n - 1) * s2) / qchisq(1 - alpha / 2, n - 1)  
+U <- ((n - 1) * s2) / qchisq(alpha / 2, n - 1)
+print(paste("Conf interval for variance is:", L, "and", U))
+
+```

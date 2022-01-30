@@ -1,0 +1,127 @@
+---
+output:
+  html_document: default
+
+---
+
+### 1.a) Write the formula of the logistic regression, explaining the terms used in the ex-pression. 
+- Log Odds:
+$$\eta_i = \beta_0 + x_1 \beta_1 -> \eta_i = 5.69788 + (-0.10991) * x_1)$$  
+Where $\beta_0$ is the intercept, $\beta_1$ is the estimator for yards and $x_1$ is the number of yards in an observation.  
+
+- Odds: 
+$$ e^{\eta_i} $$  
+
+
+- Probability: 
+$$ p_i = \frac{e^{\eta_i}} {1 + e^{\eta_i}} $$  
+
+  
+### 1. b) Calculate the z-value of the estimates  
+- For $\beta_0$:  
+$$ z = \frac{\hat{\beta_0} - \beta^0}{se(\hat{\beta_0)}} ->z = \frac{5.69788 - 0}{0.45110}$$  
+
+
+```{r}
+z <- 5.69788/0.45110
+z
+```
+  
+- For $\beta_1$:  
+$$ z = \frac{\hat{\beta_1} - \beta^0}{se(\hat{\beta_1)}} ->z = \frac{-0.10991 - 0}{0.01058}$$
+```{r}
+z <- -0.10991/0.01058
+z
+```
+  
+### 1.c)What are the estimated odds that a 60 yard field goal will succeed  
+
+$$ \eta_i = 5.69788 + (-0.10991) * 60) $$
+  
+```{r}
+eta60 <- 5.69788 + (-0.10991) * 60
+eta60
+```
+  
+Odds: $$ e^{-0.89672} $$  
+```{r}
+odds <- exp(-0.89672)
+print(paste("Odds for 60 yd: ", odds, ":1", sep = ""))
+```
+  
+### 1. d) What is the probability that a 30 yard field goal will succeed, and what is probability it will fail.  
+
+```{r}
+eta30 <- 5.69788 + (-0.10991) * 30
+odds <- exp(eta30)
+odds
+```
+  
+$$ p_{30} = \frac{e^{\eta_{30}}} {1 + e^{\eta_{30}}} -> \frac{11.02957} {1 + 11.02957}$$  
+  
+```{r}
+prob30 <- 11.02957 / (1 + 11.02957)
+print(paste("Prob. Success:",prob30))
+print(paste("Prob. Fail:",1-prob30))
+```
+  
+  
+---
+
+### 2.a Write the formula of the logistic regression, explaining the terms used in the ex-pression.  
+- Log Odds:  
+
+$$\eta_i = \beta_0 + x_1 \beta_1 + x_2 \beta_2 + x_3 \beta_3 -> 
+\eta_i = -7.6096 + 1.2046 * x_1 + 1.4210 * x_2 + 3.1973 * x_3)$$  
+  
+Where $\beta_0$ is the intercept.  
+$\beta_1$ is Aslevel estimate and $x_1$ is Aslevel observation.  
+$\beta_2$ is Sblevel estimate and $x_2$ is Sblevel observation.    
+$\beta_3$ is LineamentProx estimate and $x_3$ is observation (1 for presence and 0 for abscence)
+  
+- Probability:
+$$ p_i = \frac{e^{\eta_i}} {1 + e^{\eta_i}} $$  
+Given an calculation of Log Estimate $\eta_i$, this formula can calculate the probability of finding gold.  
+  
+### 2. b) Calculate the z-value of the estimates. (TODO discover what is exactly $\beta^0$ ) 
+$$ z = \frac{\hat{\beta_{theEstimateThatYouWantTheZed}} - \beta^0}{se(\hat{\beta_{theEstimateThatYouWantTheZed})}}$$  
+```{r}
+calculateZ <- function(betaVal, seVal, estName) {
+  print (paste(estName, betaVal / seVal))
+}
+
+beta0 <- -7.6096
+beta1 <- 1.2046
+beta2 <- 1.4210
+beta3 <- 3.1973
+
+seBeta0 <- 3.1661
+seBeta1 <- 0.4899
+seBeta2 <- 0.7301
+seBeta3 <- 1.8911
+
+calculateZ(beta0,seBeta0,"Beta0")
+calculateZ(beta1,seBeta1,"Beta1")
+calculateZ(beta2,seBeta2,"Beta2")
+calculateZ(beta3,seBeta3,"Beta3")
+  
+```
+
+### 2. c) What are the probability of finding a gold deposit given an As level of 3, Sblevel of 4 and no lineament.  
+
+$$ \eta_i = -7.6096 + 1.2046 * 3 + 1.4210 * 4 + 3.1973 * 0) $$  
+```{r}
+logOdds <- -7.6096 + 1.2046 * 3 + 1.4210 * 4 + 3.1973 * 0
+odds <- exp(logOdds)
+probability <- odds / (1 + odds)
+probability
+```
+  
+### 2. d) Given a 95% rejection criteria with a z-criteria of (-1.96,196), are the estimates of the coefficents significant.  
+- Beta2 1.9463 and Beta3 1.6907 aren't significant  
+
+### extra. 95% conf interval for each beta (see teacher's notes):
+$$\beta +- 1.96 SE (\beta) $$
+
+
+  

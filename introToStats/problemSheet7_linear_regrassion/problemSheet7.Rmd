@@ -1,0 +1,89 @@
+---
+output:
+  html_document: default
+
+---
+
+
+
+### 1.a) Write the formula of the linear regression, explaining the terms used in the ex-pression.
+$$\hat{y} = \beta_0 + x_1 \beta_1$$  
+Where $\hat{y}$ is the predicted brain weight value, $\beta_0$ is the intercept (325.5734) in this case, and $\beta_1$ is the head size multiplier, (0.26343) in this case. $x_1$ is a observed head size.
+$$\hat{y} = 325.5734 + 0.26343x_1 $$ 
+  
+### 1.b) What is the predicted brain weight for a head of size 1280 c m3.
+$$\hat{y} = 325.5734 + 0.26343 * 1280 = 662.7638$$ 
+  
+### 1.c) Calculate the 95% confidence intervals for the coefficients.
+
+Conf int 95% (TODO fix that! 95% should result in 1.96)
+```{r}
+  abs(qt(p = 0.05, df = 235))
+```
+(TODO fix that! I should use the Beta values here not this 12511.97 and 3.79)
+$$\hat{\beta_0} \pm t_{235,\alpha/2} S_{\hat{\beta_0}} ->
+  325.5734 \pm 1.651364 * 47.14085 -> [403.42, 247.73]$$
+
+$$\hat{\beta_1} \pm t_{235,\alpha/2} S_{\hat{\beta_1}} ->
+  0.26343 \pm 1.651364 * 0.01291 -> [0.2847491, 0.2421109]$$
+(TODO: if the confidence interval doesn't overlap with 0, it's significant    )
+
+### 1.d) How much of the variance in brain weight does the model explain and is it statistically significant.  
+
+The model explains 63.93% of the variance of brain weight. p-value: < 2.2e-16 So it's statistically relevant.  
+
+  
+    
+### 2.a) Calculate the $\beta_0$ and $\beta_1$ estimates.  
+$SS_{x,x} =31486154$ $Cov(x,y)=8294377$  
+TODO fix this! the right formula Cov(x,y)/ SSxx, I did the opposite!
+$$\beta_1 =  \frac{SS_{x,x}}{Cov(x,y)}= \frac{31486154}{8294377} = 3.796084$$
+  
+$$ \beta_0 = \overline{y} - \beta_1 \overline{x} = 1283 - 3.796084 * 3634 = -12511.97 $$
+  
+### 2.b)  Write the formula of the linear regression, explaining the terms used in the ex-pression.  
+$$\hat{y} = -12511.97 + 3.796084x_1 $$
+  
+### 2.c) Calculate the t-value for the $\beta_0$ and $\beta_1$ estimates.
+TODO: I should use 325.57 (B0) and 0.263 (B1) not those values whatever they are   
+$$(\hat{\beta_0})_{tvalue} = \frac{\hat{\beta_0}}{S_{\hat{\beta_0}}} ->
+  \frac{-12511.97}{47.14085} = -265.4167$$
+
+$$(\hat{\beta_1})_{tvalue} = \frac{\hat{\beta_1}}{S_{\hat{\beta_1}}} ->
+  \frac{3.796084}{0.01291} = 294.0421$$
+  
+### 2.d) Using a 95% criteria determine if the Coefficients are significant.
+Conf int 95%
+TODO, again, here I should use +-1.96
+```{r}
+  abs(qt(p = 0.05, df = 235))
+```
+  
+
+$$\hat{\beta_0} \pm t_{235,\alpha/2} S_{\hat{\beta_0}} ->
+  -12511.97 \pm 1.651364 * 47.14085 -> [-12434.12, -12589.82]$$
+  
+  
+$$\hat{\beta_1} \pm t_{235,\alpha/2} S_{\hat{\beta_1}} ->
+  3.796084 \pm 1.651364 * 0.01291 -> [3.774765, 3.817403]$$
+  
+  
+  
+    
+### 3.a) Write the formula of the linear regression, explaining the terms used in the expression.  
+
+$$\hat{y} = \beta_0 + headSize_i \beta_1 + ageGroup_i\beta_2 +  sex_i \beta3 $$  
+  
+### 3.b) What is the predicted brain weight for a head of size $1280cm^3$, Age group 2, and female
+$$\hat{y} = 464.56281 + 1280 * 0.24421 + 1 * -23.96845 +  1 * -22.54325 = 730.6399 $$ 
+  
+  
+  
+### 3.c) How much of the variance in brain weight does the model explain and is it statistically significant.
+65.28% and is relevant 
+  
+  
+### 3.d) Explain how the degrees of freedom are calculated for the F statistic.  
+That's the number of observed values -2. Here we have 233 DF so we had 235 observed values
+
+

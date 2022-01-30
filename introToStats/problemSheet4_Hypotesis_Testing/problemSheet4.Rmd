@@ -82,3 +82,8 @@ $$ standardError = \sqrt{\frac{0.25 * (1-0.25)}{1000}} -> 0.01369$$
 $$ z = \frac{0.29-0.25}{0.01369} -> 2.92$$  
 
 Conclusion: The die is not fair
+
+S(4)=1/ ((1-0.8) + (0.8/4)) = 2.5
+
+
+
