@@ -34,20 +34,21 @@ plot(optometryData$ChamberDepthMM,
      ylab = "Mean Refractive Errors")
 fitOptometry=lm(MeanRefractiveErrors~ChamberDepthMM,data=optometryData)
 abline(fitOptometry,col='red',lwd=2)
-legend('topleft', legend='Least Squares Line',col='red',lwd=1)
+
 #dev.off()
 
 #summary(fitOptometry)
 #the bigger the chamber Dept, smaller it's the error, 
 #this model is significative and explains 25.97% of the error variation
-jpeg("fitOptometryCurved.jpg", width = 350, height = 350)
-plot(optometryData$ChamberDepthMM, 
-     optometryData$MeanRefractiveErrors, 
-     main = "Mean Refractive Errors\n explained by Chamber Depth",
-     xlab = "Chamber Depth (MM)",
-     ylab = "Mean Refractive Errors")
+#jpeg("fitOptometryCurved.jpg", width = 350, height = 350)
+#plot(optometryData$ChamberDepthMM, 
+#     optometryData$MeanRefractiveErrors, 
+#     main = "Mean Refractive Errors\n explained by Chamber Depth",
+#     xlab = "Chamber Depth (MM)",
+#     ylab = "Mean Refractive Errors")
 fitOptometryCurved=lm(MeanRefractiveErrors~ChamberDepthMM+I(ChamberDepthMM^2),data=optometryData)
 summary(fitOptometryCurved)
-curve(-2.708+5.233*x-1.326*x^2,from=2,to=86,col='red',add=T,lwd=2)
-#The lis doesn't differ much from the linear model one 
+curve(-2.708+5.233*x-1.326*x^2,from=2.5,to=5,col='blue',add=T,lwd=2)
+legend('topleft', legend=c('Simple ls line','LS quadratic line'),col=c('red', 'blue'),lwd=1)
+#The lis doesn't differ much from the linear model one but fits better the data 
 #dev.off()
