@@ -23,7 +23,7 @@ plot(bf_study$neck_circumference,
 fit_bf_study=lm(body_fat~neck_circumference,data=bf_study)
 abline(fit_bf_study,col='red',lwd=2)
 summary(fit_bf_study)
-#body fat increases 1.68 for each unit of neck circumference 
+#body fat increases 1.68 on average for each unit of neck circumference 
 #P value indicated that it's significant 
 
 #hypothesis testing 
@@ -35,10 +35,10 @@ t
 
 #4) get rejection region for 95% two tailed df = 250
 rejectionReg <- qt(c(.025, .975), df=250)
-
+rejectionReg
 #5) t is way larger than 1.969 so we reject the null hypothesis and can say that neck size 
 # can be used to predict body weight
 
 #90% CI for the slope 
-1.688927 + qt(.1, df=250) * 0.1897287
-1.688927 - qt(.1, df=250) * 0.1897287
+1.688927 + qt(.05, df=250) * 0.1897287
+1.688927 - qt(.05, df=250) * 0.1897287
