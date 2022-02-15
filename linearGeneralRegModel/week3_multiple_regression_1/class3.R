@@ -50,9 +50,13 @@ source('anovatab.R')
 anovatab(fit_forestry)
 #reject the null hypothesis, there is at least one non-zero predictor
 
+#stage 2 analisys
+#variance-covariance table
+vcov(fit_forestry)
+
 # (a) HD=50, tree_years=10000, comp=0.07
 # (b) HD=60, tree_years=6000, comp=0.05
 # (c) HD=34, tree_years=12000, comp=0.10
-predict_data <- data.frame(hd=50, tree_years=10000 , competition=0.07)
-predict(fit_forestry, newdata = predict_data, interval = "confidence")
-predict(fit_forestry, newdata = predict_data, interval = "prediction")
+predict_data <- data.frame(hd=c(50,60,34), tree_years=c(10000,6000,12000) , competition=c(0.07,0.05,0.1))
+predict(fit_forestry, newdata = predict_data, interval = "confidence", level = 0.90)
+predict(fit_forestry, newdata = predict_data, interval = "prediction", level = 0.90)
