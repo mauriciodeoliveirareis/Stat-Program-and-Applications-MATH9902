@@ -1,0 +1,53 @@
+
+
+##Regression 2C Code  
+
+```{r}
+
+current_path = rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+source("anovatab.R")
+
+```
+
+###dose-response data
+```{r}
+dr = read.table("doseresponse.txt",header=T,sep=' ')
+fit_dr<- lm(activity~dose+I(dose^2),data=dr)
+summary(fit_dr)
+```
+### We can calculate this table by hand using the results above:  
+```{r}
+anovatab(fit_dr)
+```
+
+### How to predict using our model?
+```{r}
+predict(fit_dr, data.frame(dose=40))
+
+```
+
+### Plotting the data for confidence interval:
+```{r}
+newdat = data.frame(dose = 10:80)
+newdat$pred = predict(object = fit_dr, newdata = newdat, interval = "confidence")
+plot(dr$dose, dr$activity, pch=20,col='blue',cex=2,)
+with(newdat, lines(x = dose, y = pred[,"fit"]))
+with(newdat, lines(x = dose, y = pred[,"lwr"], col='red', lty=2))
+with(newdat, lines(x = dose, y = pred[,"upr"], col='red', lty=2))
+legend("bottom",legend=c('fiited values','95% Confidence Intervals'),lty=c(1,2),lwd=2,col='red')
+
+```
+  
+### Plotting the data for prediction interval:
+```{r}
+newdat = data.frame(dose = 10:80)
+newdat$pred = predict(object = fit_dr, newdata = newdat, interval = "prediction")
+plot(dr$dose, dr$activity, pch=20,col='blue',cex=2, ylim=c(min(newdat$pred[,"lwr"]),max(newdat$pred[,"upr"])))
+with(newdat, lines(x = dose, y = pred[,"fit"]))
+with(newdat, lines(x = dose, y = pred[,"lwr"], col='red', lty=2))
+with(newdat, lines(x = dose, y = pred[,"upr"], col='red', lty=2))
+legend("bottom",legend=c('fiited values','95% Prediction Interval'),lty=c(1,2,3),lwd=c(2,2,4),col=c('red','red'))
+```
+  
+

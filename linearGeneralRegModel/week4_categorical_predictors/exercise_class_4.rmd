@@ -1,0 +1,94 @@
+    An experiment was performed to compare the effectiveness of 4 different 
+    treatments on postoperative dental pain. The treatments were combinations of codeine
+    and acupuncture. The Pain Data set is on the website. Download it and read it into
+    R. It consists of 5 variables as follows.
+    (a) Painlevel: baseline pain tolerance.
+    (b) Codeine: indicator variable, 1=no codeine administered, 2=codeine adminis-
+    tered.
+    (c) Acupuncture: indicator variable, 1=no acupuncture administered, 2=acupunc-
+    ture administered.
+    (d) Relief: Pain relief from self-reporting.
+    (e) Treat: factor variable with the following factor; Treat Code
+    1=no codeine, no acupuncture
+    2=codeine, no acupuncture
+    3=no codeine, acupuncture
+    4=codeine, acupuncture
+
+    (2.) To perform a regression analysis on these data use lm(.) with the factor(.) 
+    function and treat as the single predictor. This will automatically create the
+    required dummy variables and impose the set to zero constraint to get a solution. 
+    To do this you must declare the variable treat as a factor variable. 
+
+    (3.) Get the parameter estimate table and write down what each parameter in the parameter
+    estimate table is estimating in the context of the experiment performed.
+
+    (3.) Create the dummy variables by hand for fitting the same model as that given 
+    using factor(.).
+
+    (4.) Fit a new model, allowing for an effect of codeine and the effect of acupuncture
+    separately. Con you see any advantages/disadvantages to this model?
+  
+```{r}
+current_path = rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+source("anovatab.R")
+```
+
+```{r}
+pain=read.table("pain.txt",header=T)
+pain
+```
+
+#### Regression analysis
+
+```{r}
+treatF <- factor(pain$treat)
+fit_pain=lm(Relief~treatF,data=pain)
+anovatab(fit_pain)
+summary(fit_pain)
+by(pain$Relief,pain$treat,mean)
+
+```
+#### Confidence interval for each parameter:
+
+```{r}
+confint(fit_pain)
+```
+
+#### Creating dummy variables by myself:
+```{r}
+pain$t1=pain$t2=pain$t3=pain$t4=0
+pain$t1[pain$treat==1]=1 
+pain$t2[pain$treat==2]=1 
+pain$t3[pain$treat==3]=1 
+pain$t4[pain$treat==4]=1
+
+```
+
+
+#### Fitting model with dummy:  
+```{r}
+fit_d_pain <- lm(Relief~t2+t3+t4, data=pain)
+anovatab(fit_d_pain)
+summary(fit_d_pain)
+confint(fit_d_pain)
+```
+
+  
+```{r}
+CodeineF <- factor(pain$Codeine)
+AcuF <- factor(pain$Acupuncture)
+fit_s_pain=lm(Relief~CodeineF+AcuF,data=pain)
+anovatab(fit_s_pain)
+summary(fit_s_pain)
+
+```
+
+```{r}
+data.frame(
+separated=predict(fit_s_pain, data.frame(CodeineF2=c(0,0,1,1), AcuF2=c(0,1,0,1))),
+
+together=predict(fit_pain, data.frame(treatF2=c(0,0,0,1), treatF3=c(0,0,1,0), treatF4=c(0,1,0,0)))
+)
+```
+

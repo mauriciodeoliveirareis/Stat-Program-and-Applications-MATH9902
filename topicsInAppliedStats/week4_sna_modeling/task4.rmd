@@ -1,0 +1,30 @@
+```{r}
+library(statnet)
+
+load(url("https://acaimo.github.io/teaching/data/lazega.Rdata"))
+
+```
+
+```{r}
+y <- lazega$ADVICE
+rgmodel <- y ~ edges 
+#summary(y, print.adj = FALSE)
+mle.rgmodel <- ergm(rgmodel)
+summary(mle.rgmodel)
+```
+  
+```{r}
+ergmodel_1 <- y ~ edges + nodematch('gender') + nodematch('practice')
+
+mle.ergmodel_1 <- ergm(ergmodel_1)
+
+summary(mle.ergmodel_1)
+
+```
+  
+### Goodness of fit
+```{r}
+gof(mle.ergmodel_1)
+
+```
+

@@ -1,0 +1,99 @@
+```{r}
+current_path = rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+source("anovatab.R")
+```
+
+```{r}
+#Done on exercise_class4
+pain=read.table("pain.txt",header=T)
+pain
+```
+###fit One way analysis of variance (ANOVA)  
+```{r}
+treatF <- factor(pain$treat)
+fit_pain=lm(Relief~treatF,data=pain)
+summary(fit_pain)
+```
+- Stage I Analysis: As p-value is < 0.05 on F-statistic, we reject the null hypothesis (that there is not relationship between treat and Relief) 
+- Remember that $\hat{\beta}_1$ is actually estimate of $t_2 - t_1$ and $\hat{\beta}_2$ is $t_3 - t_1$
+
+```{r}
+anovatab(fit_pain)
+```
+  
+#### Creating dummy variables by myself:
+```{r}
+
+d1=d2=d3=d4=rep(0,nrow(pain))
+d1[pain$treat==1]=1
+d2[pain$treat==2]=1
+d3[pain$treat==3]=1
+d4[pain$treat==4]=1
+pain=cbind(pain,d1,d2,d3,d4)
+
+
+```
+
+#### Fitting model with dummy
+```{r}
+fit_d_pain <- lm(Relief~d2+d3+d4, data=pain)
+summary(fit_d_pain)
+
+```
+  
+#### Fitting model with dummy with all variables
+```{r}
+fit_d2_pain <- lm(Relief~d1+d2+d3+d4, data=pain)
+summary(fit_d2_pain)
+
+```
+
+#### Return to regular fitting 
+```{r}
+summary(fit_pain)
+```
+  
+
+
+```{r}
+library(multcomp)
+```
+  
+
+### Apply General Linear Hyphotesis 
+#### compare t2 vs t3 -> $t2 - t3$
+```{r}
+L=cbind(0,1,-1,0)
+glh1=glht(fit_pain,linfct=L)
+summary(glh1,test=Ftest())
+```
+
+- P-value is 0.62 so there is no evidence that t2 is different from t3 (codeine vs acumpuncture)
+
+#### compare t3 vs t4 -> $t3 - t4$ (acupuncture vs acupuncture+codeine)
+```{r}
+L=cbind(0,0,1,-1)
+glh1=glht(fit_pain,linfct=L)
+summary(glh1,test=Ftest())
+
+```
+- P-value is small so there is evidence that the combined treatment t4 is more effective than t3
+
+#### compare t2 vs t4 -> $t2 - t4$ (codeine vs acupuncture+codeine)
+```{r}
+L=cbind(0,1,0,-1)
+glh1=glht(fit_pain,linfct=L)
+summary(glh1,test=Ftest())
+
+```
+- P-value is small so there is evidence that the combined treatment t4 is more effective than t2 as well
+
+
+#### compare t1 vs t4 -> $t1 - t4$ (nothing vs acupuncture+codeine)
+```{r}
+L=cbind(0,0,0,1)
+glh1=glht(fit_pain,linfct=L)
+summary(glh1,test=Ftest())
+
+```

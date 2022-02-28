@@ -1,0 +1,58 @@
+## Regression 3A code  
+
+```{r}
+
+current_path = rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+source("anovatab.R")
+
+```
+
+```{r}
+clinical=read.table("clinical.txt",header=T)
+clinical
+```
+### Wrong Model  
+```{r}
+fitx=lm(response~treatment,data=clinical)
+with(clinical,plot(treatment,response,pch=20,col='blue',cex=2))
+abline(reg=fitx,col='red',lwd=2)
+
+```
+  
+###Correct model 
+```{r}
+fit_clinical=lm(response~factor(treatment),data=clinical)
+anovatab(fit_clinical)
+fit_clinical
+by(clinical$response,clinical$treatment,mean)
+
+```
+  
+```{r}
+summary(fit_clinical)
+```
+  
+```{r}
+confint(fit_clinical)
+```
+  
+## using customise General Linear Hypothesis (GLH) test.  
+#### You only need to use the following line once, i.e. the first time you wish to use the multcomp library.  
+```{r}
+#install.packages('multcomp')
+library(multcomp)
+```
+  
+```{r}
+L1=rbind(c(0,-1,1))
+glh1=glht(fit_clinical,linfct=L1)
+summary(glh1,test=Ftest())
+```
+
+  
+```{r}
+confint(glh1,level=0.95)
+
+```
+
