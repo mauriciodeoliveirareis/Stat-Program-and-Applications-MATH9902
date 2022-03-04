@@ -1,0 +1,43 @@
+```{r}
+current_path = rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+source("anovatab.R")
+```
+
+```{r}
+clover=read.csv("Clover.csv",header=T)
+clover$Strain=factor(clover$Strain)
+```
+
+#### fit One-way ANOVA model
+```{r}
+fit_clover=lm(Nitrogen~Strain,data=clover)
+anovatab(fit_clover)
+
+```
+  
+```{r}
+summary(fit_clover)
+```
+#### compare treatment means
+```{r}
+#install.packages("emmeans")
+library(emmeans)
+## CER for treatment comparisons clover data
+emmeans(fit_clover,pairwise~Strain,adjust="none")
+```
+```{r}
+## SCI for treatment comparisons clover data
+emmeans(fit_clover,pairwise~Strain,adjust="bonferroni")
+```
+```{r}
+## FER for treatment comparisons clover data
+emmeans(fit_clover,pairwise~Strain,adjust="holm")
+```
+
+  
+```{r}
+## FDR for treatment comparisons clover data
+emmeans(fit_clover,pairwise~Strain,adjust="fdr")
+```
+

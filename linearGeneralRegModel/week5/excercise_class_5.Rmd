@@ -1,0 +1,60 @@
+```{r}
+current_path = rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+source("anovatab.R")
+```
+- Read data 
+```{r}
+leprosy=read.csv("leprosy.csv",header=T)
+leprosy
+```
+## Iteraction model
+
+```{r}
+fit_leprosy=lm(post_treat~factor(drug)*pre_treat,data=leprosy)
+summary(fit_leprosy)
+```
+```{r}
+leprosy$colour='red'
+leprosy$colour[leprosy$drug=='D']='blue'
+leprosy$colour[leprosy$drug=='F']='darkgreen'
+
+with(leprosy,plot(pre_treat,post_treat,pch=20,cex=2,col=colour))
+abline(-3.2765,0.7611,col='red',lwd=2)
+abline(-8.0943,1.4327,col='blue',lwd=2)
+abline(-1.791,1.1136,col='darkgreen',lwd=2)
+legend('topleft', legend = c('Drug A', 'Drug B', 'Drug C'), lwd = 2, col = c('red','blue','darkgreen'))
+```
+### Checking if the different slopes are required
+#### Method 1:
+```{r}
+
+drop1(fit_leprosy, test='F')
+```
+  
+#### Method 2
+```{r}
+L = matrix(c(0,0,0,0,1,0,0,0,0,0,0,1),nrow=2,ncol = 6,byrow = T)
+```
+```{r}
+library(multcomp)
+glh <- glht(fit_leprosy, linfct = L)
+summary(glh, test=F)
+```
+  
+
+#### Dropping the iteraction:
+```{r}
+fit_leprosy2=update(fit_leprosy,.~.-factor(drug):pre_treat)
+summary(fit_leprosy2)
+```
+  
+```{r}
+with(leprosy,plot(pre_treat,post_treat,pch=20,cex=2,col=colour, ylim=c(0,30),xlim=c(0,30)))
+abline(-6.9955,1.0873,col='red',lwd=2)
+abline(2.0096-6.9955,1.0873,col='blue',lwd=2)
+abline(5.5730-6.9955,1.0873,col='darkgreen',lwd=2)
+legend('topleft', legend = c('Drug A', 'Drug B', 'Drug C'), lwd = 2, col = c('red','blue','darkgreen'))
+```
+  
+
