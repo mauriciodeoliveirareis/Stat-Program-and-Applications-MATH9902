@@ -1,0 +1,114 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r}
+#set this file directory as current path
+current_path = rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+```
+
+```{r}
+#Install kable extra to render tables
+#install.packages("kableExtra")
+library(kableExtra)
+#read skincells csv file into a list in R and show basic 
+skincells=read.csv("skincells.csv",header=T)
+#show first lines of skincells table
+head(skincells) %>%
+  kbl(caption = "Skincells Dataset") %>%
+  kable_styling()
+```
+
+```{r}
+attach(skincells)
+# applies t-test function on each logcell entries using day as indices
+cells_by_day_data=by(logcells,factor(day),t.test)
+# gets all days in an a list to use later to build final dataframe
+days_list <- names(cells_by_day_data)
+# reorganizes cells_by_day list into a matrix getting only the mean[4] and confidence interval[5] from the t.test results
+cells_by_day_data=matrix(c(
+  unlist(cells_by_day_data$`1`[5:4]),
+  unlist(cells_by_day_data$`2`[5:4]),
+  unlist (cells_by_day_data$`3`[5:4]),
+  unlist (cells_by_day_data$`4`[5:4])),nrow=4,ncol=3,byrow=T)
+cells_by_day_data=data.frame(cbind(cells_by_day_data,days_list))
+colnames(cells_by_day_data)=c('mean','Lower 95% CL','Upper 95% CL','Day')
+cells_by_day_data %>%
+  kbl(caption = "Mean Cells \\& 95\\% CI zfor each experiment day.") %>%
+  kable_styling()
+detach(skincells)
+```
+  
+
+```{r}
+#transforms from strint to number to out a few decimal places to show a more readable chat
+cells_by_day_data$mean <- as.numeric(cells_by_day_data$mean)
+cells_by_day_data$`Lower 95% CL` <- as.numeric(cells_by_day_data$`Lower 95% CL`)
+cells_by_day_data$`Upper 95% CL` <- as.numeric(cells_by_day_data$`Upper 95% CL`)
+#install.packages('ggplot2')
+library(ggplot2)
+# plots the average number of cells together with it's 95% conf interval agains time exposed to radiation
+ggplot(cells_by_day_data, aes(x=Day,y=cells_by_day_data[,1])) +
+ geom_errorbar(aes(ymin=`Lower 95% CL`, ymax=`Upper 95% CL`), width=.1) +
+ geom_line() + geom_point() +expand_limits(y=c(5,10))+ylab("Average Cells(log2)")+xlab ('Time (in minutes)')+labs(title="Average number of cells by time exposed to radiation and its 95% CIs")+theme(text = element_text (size=10),axis.text.x=element_text(size=10))
+
+```
+
+```{r}
+# Ceate a color pallete to make a chart 
+#pal <- colorRamp(c("blue", "green", "orange", "red"))
+#skincells$dayColor <- rgb(pal((skincells$day - min(skincells$day)) / diff(range(skincells$day))), max=255) 
+#day_one_color <- skincells$dayColor[skincells$day==1][1]
+days_colors <- c('blue','green','orange','red')
+plot(skincells$time[day==1],skincells$logcells[day==1],pch=20,col=days_colors[1],xlab='Radiation Time',ylab='Cell Count',xlim=c
+    (1,4),ylim=c(1,17),cex=2)
+points(skincells$time[day==2],skincells$logcells[day==2],pch=20,col=days_colors[2],cex=2)
+points(skincells$time[day==3],skincells$logcells[day==3],pch=20,col=days_colors[3],cex=2)
+points(skincells$time[day==4],skincells$logcells[day==4],pch=20,col=days_colors[4],cex=2)
+
+legend('topright',legend=c('Day 1','Day 2','Day 3', 'Day 4' ),lwd=2,col=days_colors)
+```
+```{r}
+## fit full interaction model
+source("anovatab.R")
+fit1=lm(logcells~time+factor(day)+time:factor(day))
+anovatab(fit1)
+#TODO: seems like p is very small
+```
+
+```{r}
+summary(fit1)
+#TODO: time is relevant but day, it seems there is difference 1 and 2
+
+```
+
+
+```{r}
+## test for inclusion of the interaction
+drop1(fit1,test='F')
+#TODO we failed to reject the null hypothesis and assume that a common slopes model is adequate for the data
+```
+```{r}
+## retreat to common slopes model
+fit2=update(fit1,.~.-time:factor(day))
+anovatab(fit2)
+```
+
+```{r}
+# TODO, drop1 says p value is high for day, should I drop it?
+drop1(fit2,test='F')
+## AIC is slightly worse but
+# RSS seem better(lower) with this a model including day factor
+summary(fit2)
+confint(fit2)
+```
+```{r}
+## check for quadratic effect in time
+fit2a=update(fit2,.~.+I(time^2))
+drop1(fit2a,test='F')
+# AIC and RSS seem better(lower) with this quadratic model
+summary(fit2a)
+```
+
