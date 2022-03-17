@@ -1,0 +1,87 @@
+```{r}
+current_path = rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+```
+
+```{r}
+bodyfat=read.table("bodyfat.txt",header=T)
+```
+
+```{r}
+summary(bodyfat)
+```
+```{r}
+head(bodyfat)
+```
+```{r}
+fitAge <- lm(body_fat~Age, data = bodyfat)
+summary(fitAge)
+```
+Forward selection using p-value  
+
+```{r}
+scope=~Age+Weight+Height+Neck+Chest+Abdomen+Hip+Thigh+Knee+Ankle+Biceps+Forearm+Wrist
+fit0<-lm(body_fat~1, data=bodyfat)
+add1(fit0,scope,test='F')
+```
+Add the most significant predictor which is abdomen 
+
+```{r}
+fit1<-update(fit0,.~.+Abdomen)
+add1(fit1,scope,test='F')
+```
+
+```{r}
+fit2<-update(fit1,.~.+Weight)
+add1(fit2,scope,test='F')
+```
+```{r}
+fit3<-update(fit2,.~.+Wrist)
+add1(fit3,scope,test='F')
+```
+
+```{r}
+fit4<-update(fit3,.~.+Forearm)
+add1(fit4,scope,test='F')
+```
+
+```{r}
+fit5<-update(fit4,.~.+Neck)
+add1(fit5,scope,test='F')
+```
+## Backward Selection
+```{r}
+fitBack <- lm(body_fat~Age+Weight+Height+Neck+Chest+Abdomen+Hip+Thigh+Knee+Ankle+Biceps+Forearm+Wrist, data = bodyfat)
+drop1(fitBack, test='F')
+```
+```{r}
+drop1(update(fitBack,.~.-Knee), test = 'F')
+drop1(update(fitBack,.~.-Knee-Chest), test = 'F')
+drop1(update(fitBack,.~.-Knee-Chest-Height), test = 'F')
+drop1(update(fitBack,.~.-Knee-Chest-Height-Ankle), test = 'F')
+drop1(update(fitBack,.~.-Knee-Chest-Height-Ankle-Biceps), test = 'F')
+drop1(update(fitBack,.~.-Knee-Chest-Height-Ankle-Biceps-Hip), test = 'F')
+drop1(update(fitBack,.~.-Knee-Chest-Height-Ankle-Biceps-Hip-Neck), test = 'F')
+drop1(update(fitBack,.~.-Knee-Chest-Height-Ankle-Biceps-Hip-Neck-Thigh), test = 'F')
+drop1(update(fitBack,.~.-Knee-Chest-Height-Ankle-Biceps-Hip-Neck-Thigh-Age), test = 'F')
+```
+
+## Forward selection using AIC
+```{r}
+scope='~Age+Weight+Height+Neck+Chest+Abdomen+Hip+Thigh+Knee+Ankle+Biceps+Forearm+Wrist'
+fit0<-lm(body_fat~1, data=bodyfat)
+step(fit0, scope = list(lower=~1,upper=scope), direction = "forward")
+```
+
+## Backward selection using AIC
+```{r}
+scope='~Age+Weight+Height+Neck+Chest+Abdomen+Hip+Thigh+Knee+Ankle+Biceps+Forearm+Wrist'
+fit0<-lm(body_fat~Age+Weight+Height+Neck+Chest+Abdomen+Hip+Thigh+Knee+Ankle+Biceps+Forearm+Wrist, data=bodyfat)
+step(fit0, scope = list(lower=~1,upper=scope), direction = "backward")
+```
+## Step-wise selection        
+```{r}
+scope='~Age+Weight+Height+Neck+Chest+Abdomen+Hip+Thigh+Knee+Ankle+Biceps+Forearm+Wrist'
+fit0<-lm(body_fat~1, data=bodyfat)
+step(fit0, scope = list(lower=~1,upper=scope), direction = "both")
+```

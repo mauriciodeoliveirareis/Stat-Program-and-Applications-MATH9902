@@ -1,114 +1,628 @@
 ---
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
+  word_document: default
 ---
-```{r}
+```{r,echo=FALSE}
 #set this file directory as current path
 current_path = rstudioapi::getActiveDocumentContext()$path
 setwd(dirname(current_path))
 ```
 
-```{r}
-#Install kable extra to render tables
+# Skincells Data  
+
+## Introduction  
+
+The Skincells Data is consisted of 118 observations collected in 4 different days.  
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+#NOTE: I decided to hide this table as it doesn't give much info and I needed space
+#Install and load kable extra to render tables in a nicer way
 #install.packages("kableExtra")
 library(kableExtra)
+#install and load tidyverse to do dataset manipulations
+#install.packages("tidyverse")
+library(tidyverse)
 #read skincells csv file into a list in R and show basic 
 skincells=read.csv("skincells.csv",header=T)
-#show first lines of skincells table
-head(skincells) %>%
-  kbl(caption = "Skincells Dataset") %>%
-  kable_styling()
-```
 
-```{r}
+#show a sample of 10 lines of skincells table because all the data would take too
+#much space
+set.seed(5)
+skincells %>% sample_n(10) %>%
+  kbl(caption = "Table HIDDEN: Skincells Dataset Sample") %>%
+  kable_styling()
+
+```
+  
+The central question for this analysis is to consider any evidence of a differential effect of time exposed to radiation on number of cells in a culture. But, since observations were made on different days, with different conditions and amount of time samples, we want to take a look at how different are those days data collection. Table 1 below shows us that day 1 has more samples for 0.0 and 0.5 times than the other days and less samples for 3.0 and 3.5  
+
+Table 1: Quantity of Samples per time, per day:  
+  
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+# groups day and time to see the frequency of different times on each day
+timePerDay <- skincells %>% group_by(day,time) %>% count(time)
+#Print one table for each day 
+#TODO figure how to put a title here without mess with formatting
+kable(timePerDay[timePerDay["day"]==1,]) %>%
+  kable_styling(full_width = FALSE, position = "float_left")
+
+kable(timePerDay[timePerDay["day"]==2,]) %>%
+  kable_styling(full_width = FALSE, position = "float_left")
+
+kable(timePerDay[timePerDay["day"]==3,]) %>%
+  kable_styling(full_width = FALSE, position = "float_left")
+
+kable(timePerDay[timePerDay["day"]==4,]) %>%
+  kable_styling(full_width = FALSE, position = "left")
+# Note: day 1 has more samples for 0.0 and 0.5 than the other days 
+# and less samples for 3.0 and 3.5
+```
+  
+We also would like to know if there is a difference in the number of samples collected on each day, we noticed that only day 4 has 2 samples (31 total) more than the other days (29 samples).  
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+# NOTE: had to hide this as I needed space and  can easily say this table info in text
+#Check if there is a discrepancy on the days distribution
+skincells %>% count(day) %>%
+kbl(caption = "Table HIDDEN: Number of samples per day", align = "l") %>%
+  kable_styling()
+# Note: last day has two extra samples, the difference is not overwelming, 
+#let's see what else we can find
+```
+  
+Finally, we want to take a look into how many cells were alive on average each day to see if there is a difference.
+We can see this difference on Table 2. Day 1 had an average of cells higher than the other days and day 2 slightly lower. We needed to make more tests though to access if it's statistically relevant  
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
 attach(skincells)
 # applies t-test function on each logcell entries using day as indices
-cells_by_day_data=by(logcells,factor(day),t.test)
+factorDay <- factor(day)
+cells_by_day_data=by(logcells,factorDay,t.test)
 # gets all days in an a list to use later to build final dataframe
 days_list <- names(cells_by_day_data)
-# reorganizes cells_by_day list into a matrix getting only the mean[4] and confidence interval[5] from the t.test results
+# reorganizes cells_by_day list into a matrix getting only the mean[4] and
+# confidence interval[5] from the t.test results
 cells_by_day_data=matrix(c(
   unlist(cells_by_day_data$`1`[5:4]),
   unlist(cells_by_day_data$`2`[5:4]),
   unlist (cells_by_day_data$`3`[5:4]),
-  unlist (cells_by_day_data$`4`[5:4])),nrow=4,ncol=3,byrow=T)
+    unlist (cells_by_day_data$`4`[5:4])),nrow=4,ncol=3,byrow=T)
 cells_by_day_data=data.frame(cbind(cells_by_day_data,days_list))
 colnames(cells_by_day_data)=c('mean','Lower 95% CL','Upper 95% CL','Day')
 cells_by_day_data %>%
-  kbl(caption = "Mean Cells \\& 95\\% CI zfor each experiment day.") %>%
+  kbl(caption = "Table 2: Mean Cells \\& 95\\% CI for each experiment day.") %>%
   kable_styling()
 detach(skincells)
 ```
   
 
-```{r}
-#transforms from strint to number to out a few decimal places to show a more readable chat
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.show='hide'}
+# NOTE: had to hide this as I needed space and I have a table to show this info as well
+#transforms from string to number to out a few decimal places to show 
+#a more readable chart
 cells_by_day_data$mean <- as.numeric(cells_by_day_data$mean)
-cells_by_day_data$`Lower 95% CL` <- as.numeric(cells_by_day_data$`Lower 95% CL`)
-cells_by_day_data$`Upper 95% CL` <- as.numeric(cells_by_day_data$`Upper 95% CL`)
+cells_by_day_data$`Lower 95% CL` <- 
+  as.numeric(cells_by_day_data$`Lower 95% CL`)
+cells_by_day_data$`Upper 95% CL` <- 
+  as.numeric(cells_by_day_data$`Upper 95% CL`)
 #install.packages('ggplot2')
 library(ggplot2)
-# plots the average number of cells together with it's 95% conf interval agains time exposed to radiation
-ggplot(cells_by_day_data, aes(x=Day,y=cells_by_day_data[,1])) +
- geom_errorbar(aes(ymin=`Lower 95% CL`, ymax=`Upper 95% CL`), width=.1) +
- geom_line() + geom_point() +expand_limits(y=c(5,10))+ylab("Average Cells(log2)")+xlab ('Time (in minutes)')+labs(title="Average number of cells by time exposed to radiation and its 95% CIs")+theme(text = element_text (size=10),axis.text.x=element_text(size=10))
+# plots the average number of cells together with it's 95% conf interval
+# against time exposed to radiation
+ggplot(
+  cells_by_day_data, 
+  aes(x=Day,y=cells_by_day_data[,1])) +
+  geom_errorbar(aes(ymin=`Lower 95% CL`, ymax=`Upper 95% CL`), width=.1) +
+  geom_line() + 
+  geom_point() +
+  expand_limits(y=c(5,7))+
+  ylab("Average Cells(log2)")+
+  xlab ('Day of the experiment')+
+  labs(title="Plot 1: Average number of cells by time exposed to radiation and its 95% CIs")+
+  theme(text = element_text (size=10),axis.text.x=element_text(size=10))
+# NOTE day one average is way higher here, I should dig more into it
 
 ```
+  
 
-```{r}
-# Ceate a color pallete to make a chart 
-#pal <- colorRamp(c("blue", "green", "orange", "red"))
-#skincells$dayColor <- rgb(pal((skincells$day - min(skincells$day)) / diff(range(skincells$day))), max=255) 
-#day_one_color <- skincells$dayColor[skincells$day==1][1]
-days_colors <- c('blue','green','orange','red')
-plot(skincells$time[day==1],skincells$logcells[day==1],pch=20,col=days_colors[1],xlab='Radiation Time',ylab='Cell Count',xlim=c
-    (1,4),ylim=c(1,17),cex=2)
-points(skincells$time[day==2],skincells$logcells[day==2],pch=20,col=days_colors[2],cex=2)
-points(skincells$time[day==3],skincells$logcells[day==3],pch=20,col=days_colors[3],cex=2)
-points(skincells$time[day==4],skincells$logcells[day==4],pch=20,col=days_colors[4],cex=2)
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.show='hide'}
+#Note: this chart did not help much on the exploratory analysis and I didn't 
+#have space for it anyways
+day_colors <- c('blue','green','orange','red')
+attach(skincells)
 
-legend('topright',legend=c('Day 1','Day 2','Day 3', 'Day 4' ),lwd=2,col=days_colors)
+plot(time[day==1],logcells[day==1],pch=20,col=day_colors[1],
+     xlab='Radiation Time',ylab='Cell Count',xlim=c(1,4),
+     ylim=c(1,17),cex=2, main = "Cell Count Given Radiation Time and of of Experiment")
+points(time[day==2],logcells[day==2],pch=20,col=day_colors[2],cex=2)
+points(time[day==3],logcells[day==3],pch=20,col=day_colors[3],cex=2)
+points(time[day==4],logcells[day==4],pch=20,col=day_colors[4],cex=2)
+
+legend('topright',legend=c('Day 1','Day 2','Day 3', 'Day 4' ),
+       lwd=2,col=day_colors)
+# Note day 2 seems to have an outlier on 1.0 and day 2 an outlier on 2.5 but it's hard
+#to draw conclusions from this chart. This is probably not useful
+detach(skincells)
 ```
-```{r}
+## Model 1  
+  
+A linear regression model was fitted to these data with time as a continuous predictor and day as a categorical predictor. To allow maximum flexibility in the initial model, an interaction of time and day was included. Here we noticed straight away that time exposed to radiation seems to have a direct influence on the decrease of the number of cells with a p-value of 3.17e-05 and decreasing the number by -1.7451 for each extra minute exposed to radiation.  
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
 ## fit full interaction model
 source("anovatab.R")
-fit1=lm(logcells~time+factor(day)+time:factor(day))
-anovatab(fit1)
-#TODO: seems like p is very small
-```
-
-```{r}
+fit1=lm(logcells~time+factorDay+time:factorDay, data = skincells)
+#anovatab(fit1)
 summary(fit1)
-#TODO: time is relevant but day, it seems there is difference 1 and 2
-
+#Note: seems like p is very small, this model is not bad but, can I drop things?
 ```
+  
+The model is:  
+$$y_i = \beta_0 + \beta_1(time_i) + \beta_2(\delta_{ib}) + \beta_3(\delta_{ic}) + \beta_4(\delta_{id}) +\beta_5(\delta_{ib} × time_i) + \beta_6(\delta_{ic} × time_i) + \beta_7(\delta_{id} × time_i) + \varepsilon_i  $$
+  
+where $y_i$ is the number of cells on experiment i, $\delta_{ib} = 1$ if the experiment i was done on day 2 or zero it it was done other day (and similarly for $\delta_{ic}$ and d).  
 
+This model allows for different straight lines (differing in both intercept and slope) but, with a test of the null hypothesis H0 : $\beta_5 = \beta_6 = \beta_7 = 0$ (see R code) yielding a p-value of 0.72 we failed to reject the null hypothesis and, therefore, we can assume that a common slopes model is adequate for this data and we no longer need to analyse the current model.  
 
-```{r}
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+# Test null hypothesis \beta_5 = \beta_6 = \beta_7 = 0
 ## test for inclusion of the interaction
 drop1(fit1,test='F')
-#TODO we failed to reject the null hypothesis and assume that a common slopes model is adequate for the data
+#NOTE: we failed to reject the null hypothesis and assume that a common slopes model is adequate for the data
 ```
-```{r}
-## retreat to common slopes model
-fit2=update(fit1,.~.-time:factor(day))
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+## MODEL 2 retreat to common slopes model
+fit2=update(fit1,.~.-time:factorDay)
 anovatab(fit2)
 ```
 
-```{r}
-# TODO, drop1 says p value is high for day, should I drop it?
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+# NOTE: drop1 says p value is high for day, should I drop it as well?
 drop1(fit2,test='F')
-## AIC is slightly worse but
-# RSS seem better(lower) with this a model including day factor
-summary(fit2)
-confint(fit2)
 ```
-```{r}
-## check for quadratic effect in time
-fit2a=update(fit2,.~.+I(time^2))
-drop1(fit2a,test='F')
-# AIC and RSS seem better(lower) with this quadratic model
-summary(fit2a)
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+summary(fit2)
+#NOTE there is a statistical difference between day one and day two
+```
+  
+## Model 2
+  
+The following common slope model was then fitted to the data:
+$$y_i = \beta_0 + \beta_1(time_i) + \beta_2(\delta_{ib}) + \beta_3(\delta_{ic}) + \beta_4(\delta_{id}) + \varepsilon_i  $$
+  
+This leads to the following regression line equations for each day  
+$$day 1 = \beta_0 + \beta_1 × time $$
+$$day 2 = (\beta_0 + \beta_2) + \beta_1 × time $$
+$$day 3 = (\beta_0 + \beta_3) + \beta_1 × time $$
+$$day 4 = (\beta_0 + \beta_4) + \beta_1 × time $$
+  
+This model allows for a common slope for the relationship between radiation time and number of cells for each day, but different intercepts. The effect of time was statistically significant yielding a p-value of 2.016e-10. The slope parameter for time was -1.36, suggesting that there was an average  decrease in cells of -1.36 for each minute extra exposed to radiation. The effect of day still unclear since there is a difference between day 1 and 2 but not between other days. We can see the current model predicted on Plot 2: 
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+#NOTE: this is my best chart left out, still, I had to make some space and 
+#this chat is not that relevant for the final analysis
+# before more changes, let's plot this model 
+skincells$colour='blue'
+skincells$colour[skincells$day==2]='green'
+skincells$colour[skincells$day==3]='orange'
+skincells$colour[skincells$day==4]='red'
+with(skincells,plot(time,logcells,pch=20,cex=2,col=colour, main = "Plot 2: Number of cells vs. Time on radiation (Divided by experiment day) "))
+abline(7.7248,-1.3615,col='blue',lwd=2)
+abline(7.7248-1.4451,-1.3615,col='green',lwd=2)
+abline(7.7248-1.0014,-1.3615,col='orange',lwd=2)
+abline(7.7248-0.8378,-1.3615,col='red',lwd=2)
+legend('topright',legend=c('Day 1','Day 2','Day 3', 'Day 4' ),lwd=2,col=c('blue','green','orange','red'))
+#NOTE this shows clearly how the number of cells decay the more they are 
+# exposed to radiation
+#the dots showing the samples though are more generating visual pollution than helping
+# to understand what is going on
+```
+  
+  
+  
+\
+&nbsp;
+\
+&nbsp;
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+confint(fit2)
+#Note: but the conf int shows clearly how day 3 and 4 conf int overlap with zero so, 
+#what to do? 
+
 ```
 
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+library(multcomp)
+L=cbind(0,0,1,0,0)
+glh1=glht(fit2,linfct=L)
+summary(glh1,test=Ftest())
+# NOTE: As shown in summary, there is a statistical 
+#difference between day 1 and day 2 in cellcount
+
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+dayTwoAndThree=cbind(0,0,1,-1,0)
+glhDayTwoAndThee=glht(fit2,linfct=dayTwoAndThree)
+dayTwoAndFour=cbind(0,0,1,0,-1)
+glhDayTwoAndFour=glht(fit2,linfct=dayTwoAndFour)
+dayThreeAndFour=cbind(0,0,0,1,-1)
+glhDayThreeAndFour=glht(fit2,linfct=dayThreeAndFour)
+
+#NOTE: ...but we don't see this difference between any other combination of days
+#still hard to decide
+summary(glhDayTwoAndThee,test=Ftest())
+summary(glhDayTwoAndFour,test=Ftest())
+summary(glhDayThreeAndFour,test=Ftest())
+summary(glh1,test=Ftest())
+
+```
+  
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+## let's add a quadratic effect  in time and see if the model improves
+timeSquared <- I(skincells$time^2)
+fit2a=update(fit2,.~.+timeSquared)
+drop1(fit2a,test='F')
+#quadratic model seems to be relevant here
+```
+  
+## Model 3  
+We could improve our model by adding a quadratic effect to time. Our model is the following now:
+$$y_i = \beta_0 + \beta_1(time_i) + \beta_2(\delta_{ib}) + \beta_3(\delta_{ic}) + \beta_4(\delta_{id}) + \beta_5(time_i^2) \varepsilon_i  $$ 
+  
+In this model we can notice that not only day 2 difference to day 1 is statistically relevant (p-value=0.02) as the day 3 difference to day 1 is now borderline (p-value=0.0565) but, the most interesting finding here is that after 2.5 minutes of exposure to radiation, cells seem to start increasing in number again as we can see on Plot 2 and Plot 3.
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+# NOTE: It's also interesting to note that now the p-value for day 3 predictor is borderline.
+# This shows more evidence that days had an influence in the test results therefore
+#I should keep them
+
+summary(fit2a)
+```
+```{r,echo=FALSE, warning=FALSE, message=FALSE}
+#plot quadratic model
+uniqueTimes <- unique(skincells$time)
+numberOfDataPoints <- length(uniqueTimes)
+#creates dataframe to be able to predict the values accordig to our new model
+xvalues=data.frame(time=uniqueTimes, 
+                   factorDay=rep(factor(1),numberOfDataPoints),
+                   timeSquared=uniqueTimes^2)
+#generates a prediction for each day
+predsDay1=predict(fit2a,newdata=xvalues,interval="confidence")
+
+xvalues$factorDay <- rep(factor(2),numberOfDataPoints) 
+predsDay2=predict(fit2a,newdata=xvalues,interval="confidence")
+
+xvalues$factorDay <- rep(factor(3),numberOfDataPoints) 
+predsDay3=predict(fit2a,newdata=xvalues,interval="confidence")
+
+xvalues$factorDay <- rep(factor(4),numberOfDataPoints) 
+predsDay4=predict(fit2a,newdata=xvalues,interval="confidence")
+#plot fit lines for each day for predicted values
+plot(uniqueTimes, predsDay1[,"fit"], type = 'l', col='blue', pch=20,cex=2,xlab='Time(minutes)', ylab='Cells', ylim=c(2.5,9.1), main = "Plot 2: Cells vs. Time Exposed to radiation grouped by experiment day")
+lines(uniqueTimes, predsDay2[,"fit"],col='green',lwd=2)
+lines(uniqueTimes, predsDay3[,"fit"],col='orange',lwd=2)
+lines(uniqueTimes, predsDay4[,"fit"],col='red',lwd=2)
+legend('topright',legend=c('Day 1','Day 2','Day 3', 'Day 4' ),
+       lwd=2,col=day_colors)
+#Note: after 2.5 minutes, cells seem to start increasing in number again
+# multiple days make difficult to show different confidence intervals though
+# another plot is required
+
+```
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+#plot each day separately to show its confidence intervals
+allDaysPreds <- list(predsDay1,predsDay2,predsDay3,predsDay4)
+par(mfrow=c(2,2))
+for(currDay in unique(skincells$day)) {
+  mainStr <- paste("Day", currDay)
+  plot(uniqueTimes, allDaysPreds[[currDay]][,"fit"], type = 'l', col=day_colors[currDay], pch=20,cex=2,xlab='Time(minutes)', ylab='Cells', ylim=c(1,11), main = mainStr)
+
+lines(uniqueTimes,allDaysPreds[[currDay]][,"lwr"],col=day_colors[currDay],lwd=2,lty=2)
+lines(uniqueTimes,allDaysPreds[[currDay]][,"upr"],col=day_colors[currDay],lwd=2,lty=2)
+  
+}
+  
+```
+  
+## Conclusion  
+
+The central interest of this analysis was to establish a relationship between time a culture of cells was exposed to radiation and amount of cells that would die. This analysis gives evidence that the more time cells get exposed to radiation, the more cells would die until a certain point in time, that's because our quadratic predictor is a positive number (0.87) which after a few minutes overtakes the cell killing rate of our linear predictor -4.35. 
+Our quadratic model suggests that, after 2.5 minutes of exposure, the number of cells in a culture start to increase again. Whether this is due to some mutation on cells that start to replicate faster than they die or other factor, we couldn't be sure, as the increase is too small to be statistically relevant.  
+
+We also noticed that there was a statistically relevant difference between day 1 and day 2 of the experiment in number of cells, as this relevance grew when adding the quadratic model, we've decided to keep the day factor in the model. We can see the most extreme differences between day 1 with and expected value of 3.74 (with 95% CI [2.83,4.65]) cells on it's lowest point vs. day 2 with with an expected value of 2.38 (with 95% CI [1.49, 3.26]). Whether our model was affected by the fact that day 1 had more observations for lower exposure times and less observations for for higher exposure times, we could not access with our current tools.
+
+\newpage
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r, eval = FALSE}
+#set this file directory as current path
+current_path = rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+```
+
+```{r, eval = FALSE}
+#NOTE: I decided to hide this table as it doesn't give much info and I needed space
+#Install and load kable extra to render tables in a nicer way
+#install.packages("kableExtra")
+library(kableExtra)
+#install and load tidyverse to do dataset manipulations
+#install.packages("tidyverse")
+library(tidyverse)
+#read skincells csv file into a list in R and show basic 
+skincells=read.csv("skincells.csv",header=T)
+
+#show a sample of 10 lines of skincells table because all the data would take too
+#much space
+set.seed(5)
+skincells %>% sample_n(10) %>%
+  kbl(caption = "Table HIDDEN: Skincells Dataset Sample") %>%
+  kable_styling()
+
+```
+  
+```{r, eval = FALSE}
+# groups day and time to see the frequency of different times on each day
+timePerDay <- skincells %>% group_by(day,time) %>% count(time)
+#Print one table for each day 
+#TODO figure how to put a title here without mess with formatting
+kable(timePerDay[timePerDay["day"]==1,]) %>%
+  kable_styling(full_width = FALSE, position = "float_left")
+
+kable(timePerDay[timePerDay["day"]==2,]) %>%
+  kable_styling(full_width = FALSE, position = "float_left")
+
+kable(timePerDay[timePerDay["day"]==3,]) %>%
+  kable_styling(full_width = FALSE, position = "float_left")
+
+kable(timePerDay[timePerDay["day"]==4,]) %>%
+  kable_styling(full_width = FALSE, position = "left")
+# Note: day 1 has more samples for 0.0 and 0.5 than the other days 
+# and less samples for 3.0 and 3.5
+```
+  
+```{r, eval = FALSE}
+# NOTE: had to hide this as I needed space and  can easily say this table info in text
+#Check if there is a discrepancy on the days distribution
+skincells %>% count(day) %>%
+kbl(caption = "Table HIDDEN: Number of samples per day", align = "l") %>%
+  kable_styling()
+# Note: last day has two extra samples, the difference is not overwelming, 
+#let's see what else we can find
+```
+  
+```{r, eval = FALSE}
+
+attach(skincells)
+# applies t-test function on each logcell entries using day as indices
+factorDay <- factor(day)
+cells_by_day_data=by(logcells,factorDay,t.test)
+# gets all days in an a list to use later to build final dataframe
+days_list <- names(cells_by_day_data)
+# reorganizes cells_by_day list into a matrix getting only the mean[4] and
+# confidence interval[5] from the t.test results
+cells_by_day_data=matrix(c(
+  unlist(cells_by_day_data$`1`[5:4]),
+  unlist(cells_by_day_data$`2`[5:4]),
+  unlist (cells_by_day_data$`3`[5:4]),
+    unlist (cells_by_day_data$`4`[5:4])),nrow=4,ncol=3,byrow=T)
+cells_by_day_data=data.frame(cbind(cells_by_day_data,days_list))
+colnames(cells_by_day_data)=c('mean','Lower 95% CL','Upper 95% CL','Day')
+cells_by_day_data %>%
+  kbl(caption = "Table 2: Mean Cells \\& 95\\% CI for each experiment day.") %>%
+  kable_styling()
+detach(skincells)
+```
+  
+```{r, eval = FALSE}
+# NOTE: had to hide this as I needed space and I have a table to show this info as well
+#transforms from string to number to out a few decimal places to show 
+#a more readable chart
+cells_by_day_data$mean <- as.numeric(cells_by_day_data$mean)
+cells_by_day_data$`Lower 95% CL` <- 
+  as.numeric(cells_by_day_data$`Lower 95% CL`)
+cells_by_day_data$`Upper 95% CL` <- 
+  as.numeric(cells_by_day_data$`Upper 95% CL`)
+#install.packages('ggplot2')
+library(ggplot2)
+# plots the average number of cells together with it's 95% conf interval
+# against time exposed to radiation
+ggplot(
+  cells_by_day_data, 
+  aes(x=Day,y=cells_by_day_data[,1])) +
+  geom_errorbar(aes(ymin=`Lower 95% CL`, ymax=`Upper 95% CL`), width=.1) +
+  geom_line() + 
+  geom_point() +
+  expand_limits(y=c(5,7))+
+  ylab("Average Cells(log2)")+
+  xlab ('Day of the experiment')+
+  labs(title="Plot 1: Average number of cells by time exposed to radiation and its 95% CIs")+
+  theme(text = element_text (size=10),axis.text.x=element_text(size=10))
+# NOTE day one average is way higher here, I should dig more into it
+
+```
+  
+```{r, eval = FALSE}
+#Note: this chart did not help much on the exploratory analysis and I didn't 
+#have space for it anyways
+day_colors <- c('blue','green','orange','red')
+attach(skincells)
+
+plot(time[day==1],logcells[day==1],pch=20,col=day_colors[1],
+     xlab='Radiation Time',ylab='Cell Count',xlim=c(1,4),
+     ylim=c(1,17),cex=2, main = "Cell Count Given Radiation Time and of of Experiment")
+points(time[day==2],logcells[day==2],pch=20,col=day_colors[2],cex=2)
+points(time[day==3],logcells[day==3],pch=20,col=day_colors[3],cex=2)
+points(time[day==4],logcells[day==4],pch=20,col=day_colors[4],cex=2)
+
+legend('topright',legend=c('Day 1','Day 2','Day 3', 'Day 4' ),
+       lwd=2,col=day_colors)
+# Note day 2 seems to have an outlier on 1.0 and day 2 an outlier on 2.5 but it's hard
+#to draw conclusions from this chart. This is probably not useful
+detach(skincells)
+```
+
+```{r, eval = FALSE}
+## fit full interaction model
+source("anovatab.R")
+fit1=lm(logcells~time+factorDay+time:factorDay, data = skincells)
+#anovatab(fit1)
+summary(fit1)
+#Note: seems like p is very small, this model is not bad but, can I drop things?
+```
+  
+```{r, eval = FALSE}
+# Test null hypothesis \beta_5 = \beta_6 = \beta_7 = 0
+## test for inclusion of the interaction
+drop1(fit1,test='F')
+#NOTE: we failed to reject the null hypothesis and assume that a common slopes model is adequate for the data
+```
+```{r, eval = FALSE}
+## MODEL 2 retreat to common slopes model
+fit2=update(fit1,.~.-time:factorDay)
+anovatab(fit2)
+```
+
+```{r, eval = FALSE}
+# NOTE: drop1 says p value is high for day, should I drop it as well?
+drop1(fit2,test='F')
+```
+```{r, eval = FALSE}
+summary(fit2)
+#NOTE there is a statistical difference between day one and day two
+```
+
+```{r, eval = FALSE}
+# before more changes, let's plot this model 
+skincells$colour='blue'
+skincells$colour[skincells$day==2]='green'
+skincells$colour[skincells$day==3]='orange'
+skincells$colour[skincells$day==4]='red'
+with(skincells,plot(time,logcells,pch=20,cex=2,col=colour, main = "Plot 2: Number of cells vs. Time on radiation (Divided by experiment day) "))
+abline(7.7248,-1.3615,col='blue',lwd=2)
+abline(7.7248-1.4451,-1.3615,col='green',lwd=2)
+abline(7.7248-1.0014,-1.3615,col='orange',lwd=2)
+abline(7.7248-0.8378,-1.3615,col='red',lwd=2)
+legend('topright',legend=c('Day 1','Day 2','Day 3', 'Day 4' ),lwd=2,col=c('blue','green','orange','red'))
+#NOTE this shows clearly how the number of cells decay the more they are 
+# exposed to radiation
+#the dots showing the samples though are more generating visual pollution than helping
+# to understand what is going on
+```
+  
+```{r, eval = FALSE}
+confint(fit2)
+#Note: but the conf int shows clearly how day 3 and 4 conf int overlap with zero so, 
+#what to do? 
+
+```
+
+```{r, eval = FALSE}
+library(multcomp)
+L=cbind(0,0,1,0,0)
+glh1=glht(fit2,linfct=L)
+summary(glh1,test=Ftest())
+# NOTE: As shown in summary, there is a statistical 
+#difference between day 1 and day 2 in cellcount
+
+```
+
+```{r, eval = FALSE}
+dayTwoAndThree=cbind(0,0,1,-1,0)
+glhDayTwoAndThee=glht(fit2,linfct=dayTwoAndThree)
+dayTwoAndFour=cbind(0,0,1,0,-1)
+glhDayTwoAndFour=glht(fit2,linfct=dayTwoAndFour)
+dayThreeAndFour=cbind(0,0,0,1,-1)
+glhDayThreeAndFour=glht(fit2,linfct=dayThreeAndFour)
+
+#NOTE: ...but we don't see this difference between any other combination of days
+#still hard to decide
+summary(glhDayTwoAndThee,test=Ftest())
+summary(glhDayTwoAndFour,test=Ftest())
+summary(glhDayThreeAndFour,test=Ftest())
+summary(glh1,test=Ftest())
+
+```
+  
+```{r, eval = FALSE}
+## let's add a quadratic effect  in time and see if the model improves
+timeSquared <- I(skincells$time^2)
+fit2a=update(fit2,.~.+timeSquared)
+drop1(fit2a,test='F')
+#quadratic model seems to be relevant here
+```
+  
+```{r, eval = FALSE}
+# NOTE: It's also interesting to note that now the p-value for day 3 predictor is borderline.
+# This shows more evidence that days had an influence in the test results therefore
+#I should keep them
+
+summary(fit2a)
+```
+  
+```{r, eval = FALSE}
+#plot quadratic model
+uniqueTimes <- unique(skincells$time)
+numberOfDataPoints <- length(uniqueTimes)
+#creates dataframe to be able to predict the values accordig to our new model
+xvalues=data.frame(time=uniqueTimes, 
+                   factorDay=rep(factor(1),numberOfDataPoints),
+                   timeSquared=uniqueTimes^2)
+#generates a prediction for each day
+predsDay1=predict(fit2a,newdata=xvalues,interval="confidence")
+
+xvalues$factorDay <- rep(factor(2),numberOfDataPoints) 
+predsDay2=predict(fit2a,newdata=xvalues,interval="confidence")
+
+xvalues$factorDay <- rep(factor(3),numberOfDataPoints) 
+predsDay3=predict(fit2a,newdata=xvalues,interval="confidence")
+
+xvalues$factorDay <- rep(factor(4),numberOfDataPoints) 
+predsDay4=predict(fit2a,newdata=xvalues,interval="confidence")
+#plot fit lines for each day for predicted values
+plot(uniqueTimes, predsDay1[,"fit"], type = 'l', col='blue', pch=20,cex=2,xlab='Time(minutes)', ylab='Cells', ylim=c(2.5,9.1), main = "Plot 2: Cells vs. Time Exposed to radiation grouped by experiment day")
+lines(uniqueTimes, predsDay2[,"fit"],col='green',lwd=2)
+lines(uniqueTimes, predsDay3[,"fit"],col='orange',lwd=2)
+lines(uniqueTimes, predsDay4[,"fit"],col='red',lwd=2)
+legend('topright',legend=c('Day 1','Day 2','Day 3', 'Day 4' ),
+       lwd=2,col=day_colors)
+#Note: after 2.5 minutes, cells seem to start increasing in number again
+# multiple days make difficult to show different confidence intervals though
+# another plot is required
+
+```
+
+```{r, eval = FALSE}
+#plot each day separately to show its confidence intervals
+allDaysPreds <- list(predsDay1,predsDay2,predsDay3,predsDay4)
+par(mfrow=c(2,2))
+for(currDay in unique(skincells$day)) {
+  mainStr <- paste("Day", currDay)
+  plot(uniqueTimes, allDaysPreds[[currDay]][,"fit"], type = 'l', col=day_colors[currDay], pch=20,cex=2,xlab='Time(minutes)', ylab='Cells', ylim=c(1,11), main = mainStr)
+
+lines(uniqueTimes,allDaysPreds[[currDay]][,"lwr"],col=day_colors[currDay],lwd=2,lty=2)
+lines(uniqueTimes,allDaysPreds[[currDay]][,"upr"],col=day_colors[currDay],lwd=2,lty=2)
+  
+}
+  
+```
+  

@@ -39,7 +39,7 @@ L = matrix(c(0,0,0,0,1,0,0,0,0,0,0,1),nrow=2,ncol = 6,byrow = T)
 ```{r}
 library(multcomp)
 glh <- glht(fit_leprosy, linfct = L)
-summary(glh, test=F)
+summary(glh)
 ```
   
 

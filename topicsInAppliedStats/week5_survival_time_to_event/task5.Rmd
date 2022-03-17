@@ -1,0 +1,46 @@
+```{r}
+pdf <- function(t) 1/6 * (t + t^3)
+curve(pdf, from = 0, to = 2, ylab = "f(t)", xlab = "t")
+```
+
+Find the cdf of 
+  
+```{r}
+#install.packages("mosaic")
+
+require(mosaic)
+require(mosaicCalc)
+
+F_t <- antiD(pdf(t) ~ t)  
+```
+
+Find the survival function and plot it
+```{r}
+S_t <- function(t) (1 - F_t(t)) # Survival function
+curve(S_t, from = 0, to = 2, ylab = "S(t)", xlab = "t")
+```
+Find the Hazard function and plot it
+```{r}
+h_t <- function(t) F_t(t) / S_t(t) # Survival function
+curve(h_t, from = 0, to = 1.99, ylab = "H(t)", xlab = "t")
+```
+Find the expected residual life at 
+
+```{r}
+E_t_1 <-  (1 / S_t(1)) * integrate(S_t, lower = 1, upper = 2)$value  
+E_t_1
+```
+Find the median survival time:
+```{r}
+inverse <- function(f, lower, upper){
+
+  function(y){
+    uniroot(function(x){f(x) - y}, lower = lower, upper = upper)
+  }
+}
+
+invF <- inverse(F_t, 0, 2) # Inverse distribution function (quantile function)
+t_m <- invF(0.5)$root
+t_m
+```
+

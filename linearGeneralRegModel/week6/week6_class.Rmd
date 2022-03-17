@@ -1,0 +1,34 @@
+```{r}
+current_path = rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+source('anovatab.R')
+
+```
+
+```{r}
+cotton <- read.csv("Cotton.csv", header = T)
+cotton
+```
+  
+```{r}
+#creating manual dummy variables 
+d15=d20=d25=d30=d35=rep(0,nrow(cotton))
+d15[cotton$cotton_weight==15] <- 1
+d20[cotton$cotton_weight==20] <- 1
+d25[cotton$cotton_weight==25] <- 1
+d30[cotton$cotton_weight==30] <- 1
+d35[cotton$cotton_weight==35] <- 1
+cotton <- cbind(cotton,d15,d20,d25,d30,d35)
+```
+
+```{r}
+fit1 <- lm(tensile_strength~d15+d20+d25+d30+d35,data = cotton)
+summary(fit1)
+
+```
+```{r}
+fit2 <- lm(tensile_strength~cotton_weight,data = cotton)
+summary(fit2)
+ 
+```
+

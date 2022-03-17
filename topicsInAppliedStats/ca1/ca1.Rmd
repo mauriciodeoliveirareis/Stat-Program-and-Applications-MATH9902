@@ -1,0 +1,151 @@
+---
+html_document:
+  mathjax: http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+author: "Mauricio Reis | D21125621"
+title: "Assignment 1"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, cache = TRUE)
+```
+
+Complete the following project using R Markdown and ensure that your code and output are readable in the html file.
+
+### The `gangs` network dataset
+
+Criminal (sub)network of 67 gang members of Balkan crime groups in Italy. The following vertex attributes are provided:
+
+* `nationality`: nationality of the criminal (1 = Serbian, 2 = Romanian, 3 = Greek, 4 = Bulgarian);
+
+* `sex`: sex of the criminal (1 = female, 2 = male);
+
+* `role`: role of the criminal (1 = leader, 2 = 'thug', 3 = 'lackie').
+
+```{r message=FALSE}
+library(statnet)
+load(url("https://acaimo.github.io/Bergm/network_data/gangs.Rdata"))
+```
+
+### Description
+
+Calculate and interpret:
+
+1. the density of the network;  [**10 marks**]
+```{r}
+y <- gangs
+summary(y ~ density)
+
+```
+
+*Comment*
+This value represent the number of edges divided by the number of dyads on the network and serves to assert if a network is dense or sparse. This network is sparse with $density < 0.5$  
+  
+  
+2. in- and out- degree distribution, plot the respective histograms, and identify the node(s) with the highest degree measures;  [**10 marks**]
+```{r}
+id_i <- degree(y, cmode = "indegree")
+od_i <- degree(y, cmode = "outdegree")
+numVertex <- length(network.vertex.names(y))
+par(mfrow = c(1, 2))
+
+
+barplot(table(id_i) / numVertex, 
+        main = "In-degree distribution",
+        col = "skyblue",
+        xlab = "In-degree",
+        ylab = "Relative frequency")
+
+barplot(table(od_i) / numVertex, 
+        main = "Out-degree distribution",
+        col = "skyblue",
+        xlab = "Out-degree",
+        ylab = "Relative frequency")
+
+nodesWithMaximumInDegree <- paste(which(id_i == max(id_i)),collapse = ", ")
+nodesWithMaximumOutDegree <- paste(which(od_i == max(od_i)),collapse = ", ")
+print(paste("The node(s) with maximum In Degree is/are:", nodesWithMaximumInDegree))
+print(paste("The node(s) with maximum Out Degree is/are:", nodesWithMaximumOutDegree))
+```
+
+*Comment*  
+
+From the histogram above we can notice that the most common by far for a node in the network is to receive (in) 0 connections. In the case of a node pointing out to another node (out), the most common is point out to 1 other node closely followed by 0.  
+
+We also discovered that the nodes with the maximum In Degree are 30 and 57 and the node with the maxium Out degree is 57.
+
+
+
+3. the geodesic distances of the network; [**10 marks**]
+```{r fig.height=7, fig.width=7}
+gd <- geodist(y)$gdist
+
+cp <- hcl.colors(nlevels(factor(gd)), "Teal")
+
+heatmap(gd,
+        Rowv = NA, Colv = "Rowv", 
+        symm = TRUE, 
+        col = cp, 
+        frame = TRUE)
+```
+
+*Comment*
+As you can see in the heapmap above, there is not one single node in this network that connect with all the other nodes (we at least a few blank spaces on every line). We can also notice the diagonal dark line that shows for each position where the node references itself. The varied colours show that we have some nodes connecting with others through a long path (lighter colours) and others through a short path (darker colours)  
+
+
+4. the betweenness centrality (and plot it) and identify the nodes with the highest values of this measure; [**10 marks**]
+```{r fig.height=7, fig.width=8}
+# replace this comment with your code
+```
+
+*Comment*
+
+5. the clustering coefficient of the network; [**10 marks**]
+```{r}
+# replace this comment with your code
+```
+
+*Comment*
+
+6. the **edgewise** reciprocity between criminals with the same nationality (hint: `mutual(same  = ...)`). [**10 marks**]
+```{r}
+# replace this comment with your code
+```
+
+*Comment*
+
+### Visualisation 
+
+7. Plot two network graphs by setting the vertex sizes proportional on their in- and out-degree respectively using the "fruchtermanreingold" layout (include vertex labels); [**10 marks**]
+```{r fig.height=7, fig.width=8}
+# replace this comment with your code
+```
+
+*Comment*
+
+8. Plot three network graphs (with legend) setting a different the vertex colour for each level of the nodal attributes using the "kamadakawai" layout. [**10 marks**]
+```{r fig.height=7, fig.width=7}
+# replace this comment with your code
+```
+
+*Comment*
+
+### Statistical modelling  [**20 marks**]
+
+Estimate, interpret and assess the exponential-family random graph model specified by the following network effects:
+
+  + density;
+
+  + reciprocity;
+  
+  + reciprocity between actors with the same role;
+  
+  + homophily between actors with the same nationality.
+
+```{r}
+# replace this comment with your code
+```
+
+*Comment*
