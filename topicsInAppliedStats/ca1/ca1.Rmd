@@ -29,6 +29,27 @@ library(statnet)
 load(url("https://acaimo.github.io/Bergm/network_data/gangs.Rdata"))
 ```
 
+```{r}
+#helper functions 
+nationalityList <- c('Serbian', 'Romanian', 'Greek', 'Bulgarian')
+nationalityColList <- c('Red', 'Yellow', 'Blue', 'Green')
+sexList <- c('female', 'male')
+sexColList <- c('pink', 'blue')
+roleList <- c('leader', 'thug', 'lackie')
+roleColList <- c('gold', 'grey', 'brown')
+describeNode <- function(nodeNumber) {
+
+  nationality <- (y %v% "nationality")[nodeNumber]
+  sex <- (y %v% "sex")[nodeNumber]
+  role <- (y %v% "role")[nodeNumber]
+  paste("Node ", nodeNumber, " - ", 
+        "nationality: ", nationalityList[nationality], ", ",
+        "sex: ",  sexList[sex], ", ",
+        "role: ", roleList[role], sep = "")
+}
+```
+
+
 ### Description
 
 Calculate and interpret:
@@ -40,10 +61,11 @@ summary(y ~ density)
 
 ```
 
-*Comment*
-This value represent the number of edges divided by the number of dyads on the network and serves to assert if a network is dense or sparse. This network is sparse with $density < 0.5$  
+*Comment*  
+This value represents the number of edges divided by the number of dyads on the network and serves to assert if a network is dense or sparse. This network is sparse with $density < 0.5$  
   
-  
+---  
+
 2. in- and out- degree distribution, plot the respective histograms, and identify the node(s) with the highest degree measures;  [**10 marks**]
 ```{r}
 id_i <- degree(y, cmode = "indegree")
@@ -64,19 +86,21 @@ barplot(table(od_i) / numVertex,
         xlab = "Out-degree",
         ylab = "Relative frequency")
 
-nodesWithMaximumInDegree <- paste(which(id_i == max(id_i)),collapse = ", ")
-nodesWithMaximumOutDegree <- paste(which(od_i == max(od_i)),collapse = ", ")
-print(paste("The node(s) with maximum In Degree is/are:", nodesWithMaximumInDegree))
-print(paste("The node(s) with maximum Out Degree is/are:", nodesWithMaximumOutDegree))
+nodesWithMaximumInDegree <- which(id_i == max(id_i))
+nodesWithMaximumOutDegree <- which(od_i == max(od_i))
+print("The node(s) with maximum In Degree is/are:")
+print(sapply(nodesWithMaximumInDegree,describeNode))
+print("The node(s) with maximum Out Degree is/are:")
+print(sapply(nodesWithMaximumOutDegree,describeNode))
 ```
 
 *Comment*  
 
 From the histogram above we can notice that the most common by far for a node in the network is to receive (in) 0 connections. In the case of a node pointing out to another node (out), the most common is point out to 1 other node closely followed by 0.  
 
-We also discovered that the nodes with the maximum In Degree are 30 and 57 and the node with the maxium Out degree is 57.
+We also discovered that the nodes with the maximum In Degree are 30 (a Serbian female lackie) and 57 (a Bulgarian female thug) and the node with the maxium Out degree is also the 57.
 
-
+---  
 
 3. the geodesic distances of the network; [**10 marks**]
 ```{r fig.height=7, fig.width=7}
@@ -91,9 +115,12 @@ heatmap(gd,
         frame = TRUE)
 ```
 
-*Comment*
+*Comment*  
+
 As you can see in the heapmap above, there is not one single node in this network that connect with all the other nodes (we at least a few blank spaces on every line). We can also notice the diagonal dark line that shows for each position where the node references itself. The varied colours show that we have some nodes connecting with others through a long path (lighter colours) and others through a short path (darker colours)  
 
+  
+---  
 
 4. the betweenness centrality (and plot it) and identify the nodes with the highest values of this measure; [**10 marks**]
 ```{r fig.height=7, fig.width=8}
@@ -109,37 +136,137 @@ gplot.target(y[, ],
              circ.lab.cex = 0.5)
 
 ```
+```{r}
+describeNode(which.max(betweenness(y)))
+```
 
 *Comment*  
-The node with the highest value for this is node 30, followed by node 57.
+The node with the highest value for betweenness centrality is node 30 (a Serbian female lackie), followed by node 57 (a Bulgarian female thug). This means that those two gang members are the top 2 the shortest paths to connect other gang members (in terms of how many can go through this path, not necessarily that everyone can or has this as the shortest path to any other member).
+  
+  
+---  
 
 5. the clustering coefficient of the network; [**10 marks**]
 ```{r}
-# replace this comment with your code
+gtrans(y[, ],           
+       mode = "digraph")
 ```
 
-*Comment*
+*Comment*  
+Clustering coeficient is the number of triangles in a network divided by the number of connected triples. 
+
+Given that a clustering coeficient of 1 means that on our context "if gang member x is connected with member y, and member y is connect with member z, so member x is connected with member z", this value 0.0429 means that this is not that case in most of the times
+
+  
+---  
 
 6. the **edgewise** reciprocity between criminals with the same nationality (hint: `mutual(same  = ...)`). [**10 marks**]
 ```{r}
-# replace this comment with your code
+summary(y ~ edges + mutual(same = "nationality") + nodematch("nationality"))
+reciprocity <- 14/73
+reciprocityNationalityOnly <- 14/59
+print(paste("Reciprocity", reciprocity))
+print(paste("Reciprocity considering nationality only", reciprocityNationalityOnly))
 ```
 
-*Comment*
+*Comment*  
+
+Reciprocity is the number of mutual edges divided by the number of edges in the network. For the gangs dataset we found 14  mutual edges among a total of 73 edges in the network giving a reciprocity of 0.192. If we consider only the edges that have a matching nationality instead of all edges though, then this number goes up to 0.237.
+  
+---  
 
 ### Visualisation 
 
 7. Plot two network graphs by setting the vertex sizes proportional on their in- and out-degree respectively using the "fruchtermanreingold" layout (include vertex labels); [**10 marks**]
 ```{r fig.height=7, fig.width=8}
-# replace this comment with your code
+set.seed(2)
+par(mar = rep(1, 4)) 
+#id_i <- degree(y, cmode = "indegree")
+#od_i <- degree(y, cmode = "outdegree")
+
+plot(y, 
+     boxed.labels = TRUE, # nodal labels within boxes  
+     label = id_i,    # representing in degree
+     mode = "fruchtermanreingold", 
+     edge.col = "grey",
+     vertex.cex = id_i /2,
+     main = "Vertex Sizes proportional to In Degree")
+plot(y, 
+     boxed.labels = TRUE, # nodal labels within boxes  
+     label = od_i,    # representing out degree
+     mode = "fruchtermanreingold", 
+     edge.col = "grey",
+     vertex.cex = id_i /2,
+     main = "Vertex Sizes proportional to Out Degree")
 ```
 
-*Comment*
-
+*Comment*  
+The charts above shows that many nodes don't have neither in neither out connections and, looking at the in degree chart, we can see now with more clarity the two nodes with biggest in degree (7) proportional to the in degree in of the others, in the out degree chart we can see the proportion of the biggest out degree node (9) too but. we noticed here that there is second node with very high out degree compared to the others (8), which we didn't noticed before without a plot.
+  
+  
+---  
+      
 8. Plot three network graphs (with legend) setting a different the vertex colour for each level of the nodal attributes using the "kamadakawai" layout. [**10 marks**]
 ```{r fig.height=7, fig.width=7}
-# replace this comment with your code
+set.seed(5)
+par(mar = rep(1, 4)) 
+plot(y, 
+     label = 1:numVertex,
+     label.cex = 0.5,
+     vertex.cex = 2,
+     edge.col = "grey",
+     vertex.col = nationalityColList[y %v% "nationality"],
+     main = "Gangs network with nationality described by color",
+     mode = "kamadakawai")
+
+legend("topright", 
+       pt.bg  = nationalityColList[sort(unique(y %v% "nationality"))], 
+       pt.cex = 1.2,
+       pch    = 21, 
+       legend = nationalityList[sort(unique(y %v% "nationality"))], 
+       title  = 'Nationality')
 ```
+```{r}
+set.seed(5)
+par(mar = rep(1, 4)) 
+plot(y, 
+     label = 1:numVertex,
+     label.cex = 0.5,
+     vertex.cex = 2,
+     edge.col = "grey",
+     vertex.col = sexColList[y %v% "sex"],
+     main = "Gangs network with sex described by color",
+     mode = "kamadakawai")
+
+legend("topright", 
+       pt.bg  = sexColList[sort(unique(y %v% "sex"))], 
+       pt.cex = 1.2,
+       pch    = 21, 
+       legend = sexList[sort(unique(y %v% "sex"))], 
+       title  = 'sex')
+
+```
+```{r}
+set.seed(4)
+par(mar = rep(1, 4)) 
+plot(y, 
+     label = 1:numVertex,
+     label.cex = 0.5,
+     vertex.cex = 2,
+     edge.col = "grey",
+     vertex.col = roleColList[y %v% "role"],
+     main = "Gangs network with role described by color",
+     mode = "kamadakawai")
+
+legend("topright", 
+       pt.bg  = roleColList[sort(unique(y %v% "role"))], 
+       pt.cex = 1.2,
+       pch    = 21, 
+       legend = roleList[sort(unique(y %v% "role"))], 
+       title  = 'role')
+
+```
+
 
 *Comment*
 
