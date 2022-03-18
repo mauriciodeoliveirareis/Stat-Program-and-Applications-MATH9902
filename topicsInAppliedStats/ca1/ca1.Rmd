@@ -97,10 +97,21 @@ As you can see in the heapmap above, there is not one single node in this networ
 
 4. the betweenness centrality (and plot it) and identify the nodes with the highest values of this measure; [**10 marks**]
 ```{r fig.height=7, fig.width=8}
-# replace this comment with your code
+set.seed(2)
+par(mar = rep(0, 4))
+gplot.target(y[, ], 
+             betweenness(y), 
+             gmode = "graph", 
+             label = 1:length(network.vertex.names(y)), 
+             vertex.cex = 0.3,
+             edge.col = 'lightgrey',
+             label.cex = 1,
+             circ.lab.cex = 0.5)
+
 ```
 
-*Comment*
+*Comment*  
+The node with the highest value for this is node 30, followed by node 57.
 
 5. the clustering coefficient of the network; [**10 marks**]
 ```{r}
