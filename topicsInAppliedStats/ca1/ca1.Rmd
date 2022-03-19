@@ -213,7 +213,7 @@ par(mar = rep(1, 4))
 plot(y, 
      label = 1:numVertex,
      label.cex = 0.5,
-     vertex.cex = 2,
+     vertex.cex = 1,
      edge.col = "grey",
      vertex.col = nationalityColList[y %v% "nationality"],
      main = "Gangs network with nationality described by color",
@@ -232,7 +232,7 @@ par(mar = rep(1, 4))
 plot(y, 
      label = 1:numVertex,
      label.cex = 0.5,
-     vertex.cex = 2,
+     vertex.cex = 1,
      edge.col = "grey",
      vertex.col = sexColList[y %v% "sex"],
      main = "Gangs network with sex described by color",
@@ -252,7 +252,7 @@ par(mar = rep(1, 4))
 plot(y, 
      label = 1:numVertex,
      label.cex = 0.5,
-     vertex.cex = 2,
+     vertex.cex = 1,
      edge.col = "grey",
      vertex.col = roleColList[y %v% "role"],
      main = "Gangs network with role described by color",
@@ -268,7 +268,13 @@ legend("topright",
 ```
 
 
-*Comment*
+*Comment*  
+On nationality plot, apart from some isolated individuals, we can see how members of a same nationality are clustered together, with the exception of the greeks, who seem to have 3 separate small groups. Also Romanians only seem to have direct links with Serbians.  
+
+On the sex plot, we actually don't see clustering by sex as the few females in the plot do not have direct links between each other.  
+  
+On the role plot might suggest a hyerarchy of some sorts, we see that lakies are the majority. Thugs are usually surrounded by lackies, and there is only one leader that has two in edges from thugs but, for some reason, has also a bidiretional edge with a lackie.
+  
 
 ### Statistical modelling  [**20 marks**]
 
@@ -283,7 +289,47 @@ Estimate, interpret and assess the exponential-family random graph model specifi
   + homophily between actors with the same nationality.
 
 ```{r}
-# replace this comment with your code
+ergmodel_1 <- y ~ 
+  edges + # density
+  mutual + # reciprocity 
+  mutual(same = "role") + # reciprocity between actors with the same role
+  nodematch('nationality') # homophily between actors with the same nationality
+
+mle.ergmodel_1 <- ergm(ergmodel_1)
+
+summary(mle.ergmodel_1)
 ```
 
-*Comment*
+*Comment*  
+I'm not 100% if I can trust this model because, for mutual.role, with the model including all parms we got the following warning message:  
+> Model statistics ‘mutual.role’ are not varying. This may indicate that the 
+> observed data occupies an extreme point in the sample space or that the 
+> estimation has reached a dead-end configuration.  
+  
+
+Then we got NA values for Std. Error, MCMC %, z value and Pr(>|z|). Is this because we added both reciprocity and reciprocity with the same role? This model seems broken and I don't think I can make an reliable analysis on this. Even though, let's see how goodness of fit performs with this model:
+```{r}
+gof(mle.ergmodel_1)
+```
+
+
+
+Now, as previous model had issues with mutual, let's try to drop one of the reciprocities and keep just the one for actors with the same role:
+
+```{r}
+ergmodel_2 <- update(ergmodel_1,.~.-mutual)
+mle.ergmodel_2 <- ergm(ergmodel_2)
+summary(mle.ergmodel_2)
+
+```
+  
+Now we don't seem to have issues on the reciprocity with the same role.  
+```{r}
+# checks goodness of fit of the new model
+gof(mle.ergmodel_2)
+
+```
+
+
+
+
