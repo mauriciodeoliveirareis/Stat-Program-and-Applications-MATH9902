@@ -1,0 +1,114 @@
+```{r}
+# setwd as the folder where this script is in
+current_path = rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+```
+
+## Factorial Models
+### pain data: main effects model
+```{r}
+pain=read.table("pain.txt",header=T)
+pain$Codeine=factor(pain$Codeine);pain$Acupuncture=factor(pain$Acupuncture);
+fit_factorial1=lm(Relief~Codeine+Acupuncture,data=pain)
+anovatab(fit_factorial1)
+```
+
+```{r}
+drop1(fit_factorial1,test='F')
+
+```
+
+```{r}
+summary(fit_factorial1)
+
+```
+
+```{r}
+confint(fit_factorial1)
+
+```
+
+
+## pain data: interaction model
+
+```{r}
+fit_factorial2=update(fit_factorial1,.~.+Codeine:Acupuncture)
+drop1(fit_factorial2,test='F')
+```
+
+```{r}
+summary(fit_factorial2)
+```
+### interaction plot
+
+```{r}
+library(emmeans);library(ggplot2)
+emmeans(fit_factorial2,~Codeine*Acupuncture)
+```
+```{r}
+g=emmip(fit_factorial2, Codeine ~ Acupuncture)
+g+theme(axis.text=element_text(size=14),
+        axis.title=element_text(size=16,face="bold"))
+```
+### pain data: interaction & blocks included
+
+```{r}
+pain$PainLevel=factor(pain$PainLevel)
+fit_factorial3=update(fit_factorial2,.~PainLevel+.)
+drop1(fit_factorial3,test='F')
+```
+```{r}
+fit_factorial4=update(fit_factorial3,.~.-Codeine:Acupuncture)
+drop1(fit_factorial4,test='F')
+```
+```{r}
+summary(fit_factorial4)
+
+```
+```{r}
+emmeans(fit_factorial4,pairwise~Codeine)
+
+```
+```{r}
+emmeans(fit_factorial4,pairwise~Acupuncture)
+
+```
+
+### crop data
+```{r}
+crop=read.csv("crop.csv",header=T)
+crop$Fertiliser=factor(crop$Fertiliser);crop$Promoter=factor(crop$Promoter)
+fit_crop=lm(Yield~Fertiliser+Promoter,data=crop)
+anovatab(fit_crop)
+```
+```{r}
+drop1(fit_crop,test='F')
+
+```
+
+### interaction model
+```{r}
+fit_crop=update(fit_crop,.~.+Fertiliser:Promoter,data=crop)
+anovatab(fit_crop)
+
+```
+
+```{r}
+drop1(fit_crop,test='F')
+```
+
+```{r}
+summary(fit_crop)
+```
+
+```{r}
+emmeans(fit_crop,pairwise~Fertiliser:Promoter,adjust='fdr')
+```
+```{r}
+#library(ggplot2)
+g=emmip(fit_crop, Promoter ~ Fertiliser)
+g+theme(axis.text=element_text(size=14),
+        axis.title=element_text(size=16,face="bold"))
+
+```
+

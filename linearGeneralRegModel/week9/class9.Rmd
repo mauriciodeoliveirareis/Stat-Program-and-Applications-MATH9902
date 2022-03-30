@@ -1,0 +1,61 @@
+```{r}
+current_path = rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+```
+
+```{r}
+bf=read.table("bodyfat.txt",header=T)
+colnames(bf)<-tolower(colnames(bf))
+head(bf)
+```
+
+OLS Model
+```{r}
+fit0<-lm(body_fat~age+weight+height+neck+chest+abdomen+hip+thigh+knee+ankle+biceps+forearm+wrist,data=bf)
+summary(fit0)
+```
+Fit a Lasso Model
+```{r}
+#install.packages('glmnet')
+library(glmnet)
+preds<-as.matrix(bf[,3:15])
+fit_lasso1<-glmnet(preds, bf$body_fat, family = 'gaussian', alpha = 1, lambda = 0)
+summary(fit_lasso1)
+```
+```{r}
+cbind(fit0$coefficients, coef(fit_lasso1))
+```
+```{r}
+fit_lasso2<-glmnet(preds, bf$body_fat, family = 'gaussian', alpha = 1, lambda = 1000)
+cbind(fit0$coefficients, coef(fit_lasso2))
+
+```
+  
+Cross-validation to identify a good value for lambda 
+```{r}
+set.seed(29011987)
+#cv == cross validation
+cv<- cv.glmnet(preds,bf$body_fat,family='gaussian',alpha=1)
+plot(cv)
+```
+  
+```{r}
+cv
+cv$lambda
+cv$lambda.min
+cv$lambda.1se
+
+```
+Lasso with lambda set at the 1se value
+```{r}
+fit_lasso3<-glmnet(preds, bf$body_fat, family = 'gaussian', alpha = 1, lambda = 0.4168664)
+cbind(fit0$coefficients, coef(fit_lasso2),coef(fit_lasso3))
+
+```
+Fitting OLS model with same 4 predictors
+```{r}
+fitx<-lm(body_fat~age+weight+height+neck+chest+abdomen+hip+thigh+knee+ankle+biceps+forearm+wrist,data=bf)
+fitx$coefficients
+coef(fit_lasso3)
+```
+

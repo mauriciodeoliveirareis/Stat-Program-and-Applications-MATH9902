@@ -1,0 +1,69 @@
+```{r}
+current_path = rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+```
+
+
+## Fitness Data
+```{r}
+fitness=read.table("fitness.txt",header=T)
+colnames(fitness)=tolower(colnames(fitness))
+```
+
+```{r}
+#install.package("glmnet")
+library(glmnet)
+```
+
+## Fit the ordinary Least Squares:
+```{r}
+attach(fitness)
+preds=cbind(age,weight,runtime,restpulse,runpulse,maxpulse)
+fit_OLS=lm(oxygen~preds);
+```
+
+
+## Fit LASSO
+```{r}
+#alpha=1 means pure lasso
+#gaussian = normal (could use things like survival analisys instead)
+lasso_fit1=glmnet(preds,oxygen,family="gaussian",alpha=1,lambda=0)
+
+```
+## Compare with ordinary least squares
+
+```{r}
+cbind(fit_OLS$coef,coef(lasso_fit1))
+```
+
+## λ = very big!
+
+```{r}
+lasso_fit2=glmnet(preds,oxygen,family="gaussian",alpha=1,lambda=10000)
+cbind(fit_OLS$coef,coef(lasso_fit1),coef(lasso_fit2))
+```
+## Use cross validation to find ‘optimal’ λ value  
+Set seed value for random number generation  
+```{r}
+set.seed(2987887)
+cv=cv.glmnet(preds,oxygen,family="gaussian",alpha=1)
+plot(cv)
+cv$lambda.min;cv$lambda.1se;abline(h=8.106488,col='blue',lwd=2)
+legend(-4.5,34,c("lambda.min=0.0051","lambda.1se=0.6405"))
+
+```
+
+## Fit to full data using optimal λ
+
+```{r}
+lasso_fit=glmnet(preds,oxygen,family="gaussian",alpha=1,lambda=cv$lambda.1se)
+coef(lasso_fit)
+```
+
+## Not the same as…
+```{r}
+lm(oxygen~age+runtime+runpulse)
+
+```
+
+

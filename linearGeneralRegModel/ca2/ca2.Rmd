@@ -1,0 +1,97 @@
+```{r}
+# setwd as the folder where this script is in
+current_path = rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+```
+
+```{r warning=FALSE}
+# Setup that will be used across the rest of this notebook:
+#Install and load kable extra to render tables in a nicer way
+#install.packages("kableExtra")
+library(kableExtra)
+#install and load tidyverse to do dataset manipulations
+#install.packages("tidyverse")
+library(tidyverse)
+source("anovatab.R")
+# set a seed to gel always the same "random" results
+set.seed(29011987)
+
+# read carbonfibre cvs into a a dataframe
+carbon_fibre <- read.csv("carbon_fibre.csv", header=T)
+head(carbon_fibre) %>% 
+  kbl(caption = "Table 1: Fist lines of Carbon Fibre Dataset") %>%
+  kable_styling()
+
+```
+This dataset have a response, strenght, and two categorical predictors: temperature (high and low), and additive(a, b, c or d).  
+Let's first start with a Main Effects Model to understand the relationship between those predictors and the response:
+
+
+## Model 1, Main Effects Model
+Our Main Effects Model will be the following:
+$$ y_i = \beta_0 + \beta_1 \delta_{i,b} + \beta_2 \delta_{i,c} + \beta_3 \gamma_{i,low} + \varepsilon_i $$
+Where $\delta_{i,b}$ will be 1 in case of using additive b, or zero otherwise, same for $\delta_{i,c}$ for additive c. If both $\delta$ are zero, then additive a is being used.  
+Also $\gamma_{i,low}$ will be 1 in case a low temperature was used, otherwise, it will be 0.
+We can start accessing the relevance of this model by checking if any of the predictors have an effect on strength.  
+$H_0: \beta_1=\beta_2=\beta_3=0$
+$H_\alpha: \beta_j\neq0$ for some j $\epsilon{1,2,3}$
+```{r}
+# Transform categorical variables into factor in the dataset
+carbon_fibre$additive <- factor(carbon_fibre$additive)
+carbon_fibre$temperature <- factor(carbon_fibre$temperature)
+fit1=lm(strength~additive+temperature, data = carbon_fibre)
+anovatab(fit1)  %>% 
+  kbl(caption = "Table 2: Anovatab for Main Effects Model") %>%
+  kable_styling()
+```
+Based on the anovatab above, with p-value 0.0005418, we reject $H_0$ and conclude that at least one predictor affects strength.  
+We can also check the coeficcients of the model and see if they are significant:
+```{r}
+summary(fit1)[["coefficients"]] %>% 
+  kbl(caption = "Table 3: Coeficients for Main Effects Model") %>%
+  kable_styling()
+```
+Based on the P values we can see that all predictors are significant on the current model and they all reduce the strength.
+An important detail is that this model assumes that temperature and additive don't iteract with each other. To consider that, we need to move to an Iteration model.  
+  
+
+## Model 2, Iteraction Model  
+Our new model with iteration terms is the following:
+$$ y_i = \beta_0 + \beta_1 \delta_{i,b} + \beta_2 \delta_{i,c} + \beta_3 \gamma_{i,low} + \beta_4 \delta_{i,b} \gamma_{i,low} + \beta_5 \delta_{i,c} \gamma_{i,low} + \varepsilon_i $$
+  
+Where this part $\beta_4 \delta_{i,b} \gamma_{i,low} + \beta_5 \delta_{i,c} \gamma_{i,low}$ is the iteration part of the model.  
+
+```{r}
+# Add iteration to the model 
+fit2=update(fit1,.~.+additive:temperature)
+drop1(fit2,test='F')
+
+```
+In this new model, we can see that the iteraction `additive:temperature` is significant (p-value 0.002844). Although we can see on the coefficients became somewhat problematic with $\beta_1,\beta_2,\beta_3$ with p-values > 0.05.
+```{r}
+summary(fit2)[["coefficients"]] %>% 
+  kbl(caption = "Table 4: Coeficients for Iteraction Model") %>%
+  kable_styling()
+```
+
+As the iteraction part works and its predictors are significantly higher in value, let's ignore for now the problematic $\beta_1,\beta_2,\beta_3$ and see a plot of this model.
+
+```{r}
+library(emmeans);library(ggplot2)
+
+g=emmip(fit2,temperature ~ additive)
+g+theme(axis.text=element_text(size=14),
+        axis.title=element_text(size=16,face="bold"))
+```
+Here we can see that additive a has nearly identical good performance in high or low temperatures, whereas additive b has the best performance of them all in a high temperature and the worst performance in a low temperature. We can also see that additive c performs badly on low temperature and better on high temperature but not with extreme difference as additive b.
+
+```{r}
+emmeans(fit2,pairwise~additive:temperature,adjust='fdr')$contrasts %>%
+kbl(caption = "Table 5: Pairwise Contrasts for Iteraction Model") %>%
+  kable_styling()
+```
+On the pairwise contrast table we can see the statistic significance between different temperatures and additives. As seen in the chart, there is no difference between additive a with high or low temperatures.  
+Also, most importantly to notice, there is no difference in strength between additive b with high temperature and additive a (either with high or low temperature), both pairs have a very high p-value of 0.496. In fact, there is not even evidence that b at high temperature is better than c at a high temperature (p-value 0.167)
+
+## Conclusion  
+We've concluded with our interaction model that all additives a, b, and c are equally good on high temperature. Additive a though, seems to perform also as good as the others in low temperature. There is big evidence also that additive b and c perform poorly in creating carbon fibre material strength in low temperatures

@@ -289,46 +289,134 @@ Estimate, interpret and assess the exponential-family random graph model specifi
   + homophily between actors with the same nationality.
 
 ```{r}
-ergmodel_1 <- y ~ 
-  edges + # density
-  mutual + # reciprocity 
-  mutual(same = "role") + # reciprocity between actors with the same role
-  nodematch('nationality') # homophily between actors with the same nationality
+#ergmodel_1 <- y ~ 
+#  edges + # density
+#  mutual + # reciprocity 
+#  mutual(same = "role") + # reciprocity between actors with the same role
+#  nodematch('nationality') # homophily between actors with the same nationality
 
+
+ergmodel_1 <- y ~ edges + mutual + mutual(same = "role") + nodematch('nationality')
+#TODO: this is failing intermettently, find a solution to fix it.
 mle.ergmodel_1 <- ergm(ergmodel_1)
 
 summary(mle.ergmodel_1)
 ```
 
 *Comment*  
-I'm not 100% if I can trust this model because, for mutual.role, with the model including all parms we got the following warning message:  
-> Model statistics ‘mutual.role’ are not varying. This may indicate that the 
-> observed data occupies an extreme point in the sample space or that the 
-> estimation has reached a dead-end configuration.  
-  
+```{r eval = FALSE}
+#ATTENTION! the model above is failing intermittently 
+#and not working at all when using knit
+#this is the actual model summary when it works:
+Call:
+ergm(formula = ergmodel_1)
 
-Then we got NA values for Std. Error, MCMC %, z value and Pr(>|z|). Is this because we added both reciprocity and reciprocity with the same role? This model seems broken and I don't think I can make an reliable analysis on this. Even though, let's see how goodness of fit performs with this model:
+Monte Carlo Maximum Likelihood Results:
+
+                      Estimate Std. Error MCMC % z value Pr(>|z|)    
+edges                  -5.6006     0.2585      0 -21.666  < 1e-04 ***
+mutual                  4.6172     0.4440      0  10.399  < 1e-04 ***
+mutual.role            -2.4866     0.7612      0  -3.266  0.00109 ** 
+nodematch.nationality   1.9692     0.2931      0   6.718  < 1e-04 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+     Null Deviance: 6130.2  on 4422  degrees of freedom
+ Residual Deviance:  556.2  on 4418  degrees of freedom
+ 
+AIC: 564.2  BIC: 589.8  (Smaller is better. MC Std. Err. = 0.6127)
+```
+
+From a first look we can say that, according to this model, this network seems to be sparse with edges predictor -5.6216 (way below 0.5), and very a significant P-value 1e-04. In fact, all predictors in this model are very significant.  
+Another interesting fact is that the mutual reciprocity effect is positive but, for same role, the mutual reciprocity effect is negative. In other words, is more likely for gang member A to have a link back from gang member B if gang member A has a link to gang member B except when they are in the same role, in this case, it's less likely.  
+Having the same nationality also seems to positively influence the likelihood of have a link between two gang members  
+
+
+Goodness of fit:  
 ```{r}
 gof(mle.ergmodel_1)
 ```
+```{r eval=FALSE}
+#ATTENTION! as the model above is failing on knit, this is the actual 
+#goodness of fit fot he model when it works 
+#(notice that here mutual role actually has a p-value of 1 instead of 0)
+Goodness-of-fit for in-degree 
 
+         obs min  mean max MC p-value
+idegree0  30  14 21.94  36       0.14
+idegree1  17  14 24.88  35       0.06
+idegree2  12   6 13.02  22       0.96
+idegree3   6   0  5.15  11       0.82
+idegree4   0   0  1.62   6       0.38
+idegree5   0   0  0.32   2       1.00
+idegree6   0   0  0.07   1       1.00
+idegree7   2   0  0.00   0       0.00
 
+Goodness-of-fit for out-degree 
 
-Now, as previous model had issues with mutual, let's try to drop one of the reciprocities and keep just the one for actors with the same role:
+         obs min  mean max MC p-value
+odegree0  26  12 22.77  39       0.52
+odegree1  27  14 23.39  34       0.42
+odegree2   7   6 13.59  21       0.08
+odegree3   5   0  5.22  12       1.00
+odegree4   0   0  1.60   5       0.50
+odegree5   0   0  0.35   3       1.00
+odegree6   0   0  0.07   2       1.00
+odegree7   0   0  0.01   1       1.00
+odegree8   1   0  0.00   0       0.00
+odegree9   1   0  0.00   0       0.00
 
-```{r}
-ergmodel_2 <- update(ergmodel_1,.~.-mutual)
-mle.ergmodel_2 <- ergm(ergmodel_2)
-summary(mle.ergmodel_2)
+Goodness-of-fit for edgewise shared partner 
 
+     obs min  mean max MC p-value
+esp0  66  38 71.41  90       0.52
+esp1   7   0  3.35  13       0.38
+esp2   0   0  0.11   2       1.00
+
+Goodness-of-fit for minimum geodesic distance 
+
+     obs  min    mean  max MC p-value
+1     73   38   74.87   98       0.82
+2    154   17   80.33  143       0.00
+3    127    5   76.38  164       0.18
+4    101    2   65.96  180       0.42
+5     86    0   53.54  194       0.44
+6     54    0   41.05  203       0.58
+7     37    0   29.17  197       0.62
+8     16    0   20.09  163       0.80
+9      7    0   13.31  130       0.92
+10     3    0    9.00  105       0.88
+11     0    0    5.36   67       1.00
+12     0    0    2.83   41       1.00
+13     0    0    1.56   33       1.00
+14     0    0    0.66   25       1.00
+15     0    0    0.29   18       1.00
+16     0    0    0.13   12       1.00
+17     0    0    0.08    8       1.00
+18     0    0    0.05    5       1.00
+19     0    0    0.02    2       1.00
+20     0    0    0.01    1       1.00
+Inf 3764 2783 3947.31 4360       0.48
+
+Goodness-of-fit for model statistics 
+
+                      obs min  mean max MC p-value
+edges                  73  38 74.87  98       0.82
+mutual                 17   8 17.64  27       0.92
+mutual.role             2   0  1.94   6       1.00
+nodematch.nationality  59  31 60.40  78       0.92
 ```
+
+In a simulated network using our model, for in degree, we noticed that we just don't have relevant results for idegree1 and idegree7 with p-value < 0.05. And for out degrees, we would not have relevant results fot degree 8 and 9.  
+For edgewise shared partners our model yelds relevant results for 0, 1 and 2.  
+And for geodistic distance we just didn't have relevant results for 2. 
+It's seems like, overall, the predictors chosen for this network yelded a fairly good model.
+
+
+
+
   
-Now we don't seem to have issues on the reciprocity with the same role.  
-```{r}
-# checks goodness of fit of the new model
-gof(mle.ergmodel_2)
 
-```
 
 
 

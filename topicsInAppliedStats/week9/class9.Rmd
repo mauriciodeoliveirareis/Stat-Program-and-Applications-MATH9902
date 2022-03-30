@@ -1,0 +1,54 @@
+#Kaplan-Meier approach
+
+- Non-parametric approach
+- So no need for assumptions 
+
+```{r}
+library(survival)
+head(aml) 
+```
+```{r}
+SKM <- survfit(Surv(time, status) ~ 1, data = aml)
+summary(SKM)
+```
+"Probability to survive time t2 given that already survived till t1"  
+
+- if it goes down on next line more than the n. event it means that must be censored observations  
+- Can I use this model for things like how long individuals stay in a company?
+
+- h(13) = 1 / 17, h(23) = 2 / 13  
+- S(13) = 0.7391 * 16 / 17, S(31) = 0.4417 * 7 / 8  
+
+
+
+
+```{r}
+plot(SKM)
+```
+
+# Task 
+```{r}
+vetFit <- survfit(Surv(time, status) ~ 1, data = veteran)
+summary(vetFit)
+
+```
+```{r}
+plot(vetFit)
+```
+- Probablity to survive beyond $t_{28}$
+```{r}
+summary(vetFit, times= c(28))
+```
+
+```{r}
+summary(vetFit, times= c(33))
+```
+```{r}
+plot(vetFit, cumhaz = TRUE)
+#0.5?
+```
+
+```{r}
+summary(SKM,times=c(34:1000))
+```
+

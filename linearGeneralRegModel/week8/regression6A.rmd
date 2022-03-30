@@ -1,0 +1,80 @@
+```{r}
+current_path = rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+```
+
+# Functional form options
+## Dose-response2 DATA
+### Flexible modelling
+
+```{r}
+dr2=read.csv("dose_response_2.csv",header=T)
+attach(dr2);colnames(dr2)
+x=dose;y=response
+par(mfrow=c(1,1))
+plot(x,y,pch=20,col='blue',xlab='dose',ylab='response',xaxt='n',yaxt='n',pty='s')
+fit_poly=lm(y~x+I(x^2))
+lines(x,predict(fit_poly),col='red')
+fit_loess=loess(y~x)
+lines(x,predict(fit_loess),col='darkgreen',lwd=2)
+legend(250,8,legend=c("Polynomial","LOESS"),lty=1,lwd=2,col=c('red','darkgreen'))
+```
+
+## Data transformations
+```{r}
+plot(x,y,pch=20,col='blue',xlab='dose',ylab='response',xaxt='n',yaxt='n')
+lines(x,predict(fit_poly),col='red')
+fit_trans=lm(y~I(log(x)))
+lines(x,predict(fit_trans),col='purple',lwd=2)              
+legend(250,8,legend=c("Polynomial","log(x)"),lty=1,lwd=2,col=c('red','purple'))
+```
+
+## Residuals & influence
+### Forestry Data
+
+```{r}
+forestry=read.table('forestry.txt',header=T)
+attach(forestry)
+tree_years=n*age
+comp=hd/n
+forestry=cbind(forestry,tree_years,comp)
+fit=lm(mdbh~hd+tree_years+comp,data=forestry)
+resid=resid(fit)
+yhat=fitted(fit)
+par(bg='grey')
+plot(yhat,resid,pch=20,col='blue')
+```
+
+```{r}
+rstudent=rstudent(fit)
+plot(yhat,rstudent,pch=20,col='blue')
+```
+
+```{r}
+plot(dffits(fit))
+
+```
+
+```{r}
+dfb=dfbetas(fit);dfb
+```
+
+```{r}
+plot(dfbetas(fit)[,2])
+```
+
+
+```{r}
+plot(dfbetas(fit)[,3])
+```
+
+```{r}
+plot(dfbetas(fit)[,4])
+
+```
+
+```{r}
+plot(cooks.distance(fit))
+
+```
+
