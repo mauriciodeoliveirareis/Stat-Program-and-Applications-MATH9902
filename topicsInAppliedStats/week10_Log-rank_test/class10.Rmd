@@ -1,0 +1,21 @@
+```{r}
+library(survival)
+
+LRT <- survdiff(Surv(time, status) ~ x, 
+                data = aml, 
+                rho = 0) # Log-rank
+LRT
+
+```
+
+```{r}
+WT <- survdiff(Surv(time, status) ~ x, 
+                data = aml, 
+                rho = 1) # Wilcoxon
+WT
+```
+```{r}
+#see aml dataset 
+aml
+```
+

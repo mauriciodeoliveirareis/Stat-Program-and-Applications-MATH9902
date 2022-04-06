@@ -1,0 +1,695 @@
+---
+---
+---
+
+```{r}
+library(devtools)
+install_github('therneau/survival',dependencies=TRUE)
+library(survival)
+```
+
+```{r}
+library(tidyverse)
+library(knitr)
+library(survminer)
+library(survival)
+```
+
+## Load Data Sets
+
+### **Overview**
+
+-   We will use two main data sets for this tutorial which are built-in datasets:
+
+    -   the `veteran` Data Set\
+
+    -   the `colon` Data Set
+
+-   Let's start by viewing the `veteran` data set
+
+```{r}
+veteran <- veteran
+kable(head(veteran))
+```
+
+# Kaplan-Meier Estimator
+
+### **Overview**
+
+-   The Kaplan-Meier curve is a nonparametric *estimator* of the survival distribution (i.e. the "estimation" component of the "test/estimation" approach to analysis of time-to-event data)
+
+-   In their June 1958 [paper](https://web.stanford.edu/~lutian/coursepdf/KMpaper.pdf) in the Journal of the American Statistical Association, E.L. Kaplan and Paul Meier proposed a way to nonparametrically estimate S(t), even in the presence of censoring
+
+### **Analyze Survival Data in R**
+
+#### **`Surv()` Function**
+
+-   To use the functions in the `survival` library, we will have to specify both the "survival time" and the "failure indicator" in the `Surv()` function
+
+-   When we use the `Surv()` function, we specify the **time variable first** and the **failure indicator second**\
+
+-   In R, the failure indicator should equal *1 for subjects with the event* and equal *0 for subjects who are right censored*\
+
+-   You can type `time =` and `event =` as we will see below
+
+#### **Build Surv Object**
+
+```{r}
+veteran_Surv <- Surv(time = veteran$time, event = veteran$status)
+head(veteran_Surv, 50) #number+ is censored
+
+```
+
+-   In the list above, each time that has a "+" connotes that it was censored in the analysis
+
+#### **Analyze the Survival Data with the `survfit()` function**
+
+-   To analyze the data we use the `survfit()` function, in which you will place the Surv Object of interest (here `veteran_Surv`) followed by a "\~" and a `predictor`.
+
+    -   If you want a single curve, with no specific predictor, use "1".\
+
+    -   If there is a `predictor variable` for which you want to compare the outcome of, you will place that variable to the right of the "\~".\
+
+-   Then place the data you want evaluated to the right of the ",", as below.
+
+### **Generate a KM Curve**
+
+#### **Overview**
+
+-   First let's generate a KM Curve wiht No Predictor\
+
+-   We will then show how to plot that basic curve\
+
+-   Then we will demontrate how to generate a KM Curve stratifed by a Explanatory Variable (aka a "Predictor")
+
+```{r}
+# Generate Survfit Object
+veteran_Survfit <- survfit(veteran_Surv ~ 1, data = veteran)
+
+# View Survfit Analysis at various time points
+summary(veteran_Survfit, times = c(1, 50, 100*(1:10)))
+```
+
+-   The "times" argument in the "summary()" function allows you to control which time intervals you print\
+
+-   If you want to view the output of the analysis of the total output, use the following call\
+
+-   Of note, you could have also used the following code to generate the same survfit object `veteran_Survfit <- survfit(Surv(time = veteran$time, event = veteran$status) ~ 1, data = veteran)`
+
+You can also view the median of the data with the following code
+
+```{r}
+median(veteran$time)
+
+```
+
+# Visualizing Survival Data
+
+### **Overview**
+
+-   You can plot your survival data with base `R` or other functions such as `ggsurvplot()`
+
+### **Plot Data Using Base `R`**
+
+-   The `plot()` function can be used to take a surv object and generate a basic Kaplan-Meier curve, as below
+
+```{r}
+plot(veteran_Surv, 
+     main = "Overall Survival", #plot title
+     sub = "Unstratified Cohort", # Subtitle
+     xlab="Days", 
+     ylab="Survival Probability" )
+```
+
+### **Plot Data Using `ggsurvplot`**
+
+-   The `ggsurvplot` can generate visually appealing plots
+
+```{r}
+# Kaplan-Meier using ggsurvplot
+ggsurvplot(fit = veteran_Survfit, 
+           data = veteran,
+           ####### Format Title #######
+           title = "Overall Survival",
+           subtitle = "Unstratified Cohort",
+           font.title = c(22, "bold", "black"),
+           ggtheme = theme_minimal() + theme(plot.title = element_text(hjust = 0.5, face = "bold"))+
+             theme(plot.subtitle = element_text(hjust = 0.5, size = 16, face = "italic")), # center and bold title and subtitle
+           ####### Format Axes #######
+           xlab="Days", # changes xlabel,
+           ylab = "Survival Probability",
+           font.x=c(18,"bold"), # changes x axis labels
+           font.y=c(18,"bold"), # changes y axis labels
+           font.xtickslab=c(14,"plain"), # changes the tick label on x axis
+           font.ytickslab=c(14,"plain"),
+           ####### Format Curve Lines #######
+           palette = "black",
+           ####### Censor Details ########
+           censor.shape="|",
+           censor.size = 5,
+           ####### Confidence Intervals ########
+           conf.int = TRUE, # To Remove conf intervals use "FALSE"
+           conf.int.fill = "purple", # fill color to be used for confidence interval
+           surv.median.line = "hv", # allowed values include one of c("none", "hv", "h", "v"). v: vertical, h:horizontal
+           ######## Format Legend #######
+           legend.title = "All Patients",
+           legend.labs = "All Patients", # Change the Strata Legend
+           ######## Risk Table #######
+           risk.table = TRUE, # Adds Risk Table
+           risk.table.height = 0.25, # Adjusts the height of the risk table (default is 0.25)
+           risk.table.fontsize = 4.5
+           )
+```
+
+# KM Curves with a Predictor
+
+### **Overview**
+
+-   This is typically a more common use of the KM method, where one wants to test a hypothesis that a drug prolongs Overall Survival, for example
+
+### **Stratify Analysis Based on Treatment (Standard vs. Experimental)**
+
+```{r}
+# Generate Survfit_trt Object
+veteran_Survfit_trt <- survfit(veteran_Surv ~ veteran$trt, data = veteran)
+
+# View Survfit Analysis at various time points
+summary(veteran_Survfit_trt, times = c(1, 50, 100*(1:10)))
+```
+
+ʼ
+
+```{r}
+veteran_Survfit_trt
+```
+
+```{r}
+# Kaplan-Meier using ggsurvplot
+ggsurvplot(fit = veteran_Survfit_trt, 
+           data = veteran,
+           ####### Format Title #######
+           title = "Overall Survival",
+           subtitle = "Stratified By Treatment",
+           font.title = c(22, "bold", "black"),
+           ggtheme = theme_classic() + theme(plot.title = element_text(hjust = 0.5, face = "bold"))+ # theme_classic will give a white background with no lines on the plot
+             theme(plot.subtitle = element_text(hjust = 0.5, size = 16, face = "italic")), 
+           ####### Format Axes #######
+           xlab="Days", # changes xlabel,
+           ylab = "Survival Probability",
+           font.x=c(18,"bold"), # changes x axis labels
+           font.y=c(18,"bold"), # changes y axis labels
+           font.xtickslab=c(14,"plain"), # changes the tick label on x axis
+           font.ytickslab=c(14,"plain"),
+           ####### Format Curve Lines #######
+           palette = c("red","black"),
+           ####### Censor Details ########
+                      censor = TRUE, # logical value. If TRUE, censors will be drawn,
+           censor.shape="|",
+           censor.size = 5,
+           ####### Confidence Intervals ########
+           conf.int = TRUE, # To Remove conf intervals use "FALSE"
+           conf.int.fill = "purple", # fill color to be used for confidence interval
+           surv.median.line = "hv", # allowed values include one of c("none", "hv", "h", "v"). v: vertical, h:horizontal
+           ######## Format Legend #######
+           legend = "none", # If you'd prefer more space for your plot, consider removing the legend
+           legend.title = "All Patients",
+           legend.labs = c("Treatment 1","Treatment 2"), # Change the Strata Legend
+           ######## Risk Table #######
+           risk.table = TRUE, # Adds Risk Table
+           risk.table.height = 0.25 # Adjusts the height of the risk table (default is 0.25)
+           )
+```
+
+#### **Another Example of a KM stratified by an Explanatory Variable - Cell Type**
+
+```{r}
+# Generate Survfit_histo Object
+veteran_Survfit_histo <- survfit(veteran_Surv ~ veteran$celltype, data = veteran)
+
+# View Survfit Analysis at various time points
+summary(veteran_Survfit_histo, times = c(1, 50, 100*(1:10)))
+```
+
+```{r}
+veteran_Survfit_histo
+```
+
+```{r}
+# Kaplan-Meier using ggsurvplot
+ggsurvplot(fit = veteran_Survfit_histo, 
+           data = veteran,
+           title = "Overall Survival",
+           subtitle = "Stratified By Histology",
+           font.title = c(22, "bold", "black"),
+           ggtheme = theme_minimal() + theme(plot.title = element_text(hjust = 0.5, face = "bold"))+ # theme_minimal will give a white background with grid lines on the plot
+             theme(plot.subtitle = element_text(hjust = 0.5, size = 16, face = "italic")),
+           ####### Censor Details ########
+           censor = TRUE, #ogical value. If TRUE, censors will be drawn,
+           censor.shape="|",
+           censor.size = 5,
+           ####### Confidence Intervals ########
+           conf.int = TRUE, # To Remove conf intervals use "FALSE"
+           surv.median.line = "hv", # allowed values include one of c("none", "hv", "h", "v"). v: vertical, h:horizontal
+           ####### Format Axes #######
+           xlab="Days", # changes xlabel,
+           ylab = "Survival Probability",
+           font.x=c(18,"bold"), # changes x axis labels
+           font.y=c(18,"bold"), # changes y axis labels
+           font.xtickslab=c(14,"plain"), # changes the tick label on x axis
+           font.ytickslab=c(14,"plain"),
+           ######## Format Legend #######
+           legend = "none",
+           legend.title = "All Patients",
+           legend.labs = c("Squamous","Small Cell","Adenocarcioma","Large"), # Change the Strata Legend
+           ######## Plot Dimensions #######
+           surv.plot.height = 0.85, # Default is 0.75
+           ######## Risk Table #######
+           risk.table = TRUE, # Adds Risk Table
+           risk.table.height = 0.25, # Adjusts the height of the risk table (default is 0.25)
+           risk.table.fontsize = 3.0)
+```
+
+# Log-Rank Analysis
+
+### **Overview**
+
+-   To *test* for a difference between survival curves, we can use the `survdiff()` function\
+
+-   We specify the survival object (which contains the *time-to-event* and *failure* indicators) using the `Surv command` and the predictor variable
+
+-   This takes the following argument structure:\
+
+    survdiff(SurvObject \~ Predictor Variable, data = DataFrame)
+
+```{r}
+survdiff(Surv(time = veteran$time, event = veteran$status) ~ veteran$trt, data = veteran)
+
+```
+
+-   The output from the *log-rank test* provides important information:
+
+    -   First, the output provides the observed number of events and the expected number of events under the null hypothesis of no group difference\
+
+    -   We can use this part of the output to determine the direction of the effect (i.e. which group had the event faster).\
+
+    -   In this table, we can see that both groups (trt=1) and (trt=2) were similar as expected
+
+        -   Consequently it is not surprising that the p value is close to 1 (here p = 0.9)
+
+If we look at the log-rank for outcomes of the different cell types
+
+```{r}
+survdiff(Surv(time = veteran$time, event = veteran$status) ~ veteran$celltype, data = veteran)
+```
+
+-   Here we see that patients with **Small Cell** histology have more events than expected, meaning they did worse than expected compared to the null hypotheis.
+
+#### **Graph Kaplan-Meier with log-rank test displayed**
+
+```{r}
+ggsurvplot(fit = veteran_Survfit_histo, 
+           data = veteran,
+           title = "Overall Survival",
+           subtitle = "Stratified By Histology",
+           font.title = c(22, "bold", "black"),
+           ggtheme = theme_grey() + theme(plot.title = element_text(hjust = 0.5, face = "bold"))+ # theme_grey will give a grey background with  lines on the plot
+             theme(plot.subtitle = element_text(hjust = 0.5, size = 16, face = "italic")),
+           ####### Censor Details ########
+           censor = TRUE, #ogical value. If TRUE, censors will be drawn
+           censor.shape="|",
+           censor.size = 5,
+           ####### Confidence Intervals ########
+           conf.int = TRUE, # To Remove conf intervals use "FALSE"
+           surv.median.line = "hv", # allowed values include one of c("none", "hv", "h", "v"). v: vertical, h:horizontal
+           ####### Format Axes #######
+           xlab="Days", # changes xlabel,
+           ylab = "Survival Probability",
+           font.x=c(18,"bold"), # changes x axis labels
+           font.y=c(18,"bold"), # changes y axis labels
+           font.xtickslab=c(14,"plain"), # changes the tick label on x axis
+           font.ytickslab=c(14,"plain"),
+           ######## Format Legend #######
+           legend.title = "All Patients",
+           legend.labs = c("Squamous","Small Cell","Adenocarcioma","Large"), # Change the Strata Legend
+           legend = c(0.8,0.8), #c(0,0) corresponds to the "bottom left" and c(1,1) corresponds to the "top right" position
+           ######## Plot Dimensions #######
+           surv.plot.height = 0.95, # Default is 0.75
+           ######## Risk Table #######
+           risk.table = FALSE, # Adds Risk Table
+           risk.table.height = 0.35, # Adjusts the height of the risk table (default is 0.25)
+           risk.table.fontsize = 3,
+           ######## p-value details #######
+           pval = TRUE,
+           pval.size = 5,
+           pval.coord = c(1,1)
+           )
+```
+
+# Modeling Survival Data
+
+### **Overview**
+
+-   The goal of modeling survival data is to model the relationship between survival and explanatory variables
+
+-   The **Cox Proportional Hazards Model** is the most common model used for survival data
+
+    -   It is popular because it allows for a flexible choice of covariates, it is fairly easy to fit and can be performed by standard software (including, of course, `R`)\
+
+    -   First introduced in [1972](https://www.jstor.org/stable/2985181?seq=1), The Cox Proportional Hazards model is a linear model for the log of the hazard ratio
+
+    -   Generally speaking a "Hazard" is the probability of experiencing an event in a defined time period given that the subject has not experienced that event leading up to the interval
+
+        -   It is a "conditional" probability: i.e. the condition is that the subject in question has not yet experienced the event of interest by the beginning of the interval in question
+
+    -   The Proportional Hazards (PH) models λ(t;Ζ) = λ0(t)Ψ(Ζ)
+
+    -   The Cox Proportional hazards model has the advantage over a simple log-rank test of giving us an *estimate* of the "hazard ratio"\
+
+    -   This is more informative than just a test statistic, and we can also form confidence intervals for the hazard ratio
+
+\
+**Important Caveats to Proportional Hazards Models**
+
+-   A condition of the Cox model is that the hazards in the groups being tested are *proportional*
+
+    -   What this means is that from the beginning of the study period to it's end (i.e. the completion of the follow up period) the ***Hazard Ratio*** must remain constant for the hazards to be considered *proportional*\
+
+    -   However, as summarized nicely in their [article](https://jamanetwork.com/journals/jama/article-abstract/2763185), Stensrud and Hernán point out that in clinical research, especially intervention trials, due to factors such as variations in disease susceptibility and temporally differential effects between treatment groups, Hazards are quite commonly **Not Proportional**
+
+        -   Given this reality, ***Hazard Ratios*** must be interpreted in their appropriate context. Stensrud and Hernán suggest ways to supplement HRs with reports of effect measures such as restricted mean survival difference
+
+            -   A detailed analysis of these approaches is beyond the scope of this post, but we encourage you to read their JAMA article and accompanied references
+
+#### **`R` Logistics**
+
+-   In R, a Cox Model takes the following form
+
+coxph(surv(TimeVariable, EventVariable)\~IndicatorVariable, data = DataFrame)
+
+### **Coxph in Action**
+
+In the `Veteran` data set, let's look at a model that evaluates the outcome of survival time when the Predictor is Treatment
+
+```{r}
+coxph(Surv(time = veteran$time, event = veteran$status)  ~ veteran$trt, data = veteran)
+
+```
+
+-   Interpretation:
+
+    -   patients who received treatment had an increase in the log(HR) of survival by 0.01774
+
+In the `Veteran` data set, let's look at a model that evaluates the outcome of survival time when the Predictor is Cell Type
+
+```{r}
+coxph(Surv(time = veteran$time, event = veteran$status)  ~ veteran$celltype, data = veteran)
+
+```
+
+-   Interpretation:
+
+1.  compared to patients with a squamous histology, for patients with small cell histology there is a increase in the log(HR) of having an event by 1.0013 (which is statisically significant)
+
+2.  compared to patients with a squamous histology, for patients with adenocarcinoma there is a increase in the log(HR) of having an event by 1.1477 (which is statisically significant)
+
+3.  compared to patients with a squamous histology, for patients with large cell histology there is a increase in the log(HR) of having an event by 0.2301 (though this is NOT statisically significant)
+
+-   These results make intuitive sense. If we look at the survival curves, Large Cell Histology appears to have the best OS (MST of 156 days), meaning this is the group that has the fewest proportional events, where as both small cell and adenocarcinoma have an MST of 51 days, meaning they do worse and thus have more events
+
+With this dataset, we can also test hypotheses based on our biological understanding of lung cancer\
+- For example if we wanted to test the hypothesis that the treatment tested would be effective in patients with Small Cell Lung Cancer, we could subset the data set, pulling out the patients with SCLC and perform either a log-rank test or CoxPH, as follows
+
+```{r}
+SCLC <-  veteran %>% filter(celltype=="smallcell")
+survdiff(Surv(time = SCLC$time, event = SCLC$status) ~ SCLC$trt, data = SCLC)
+```
+
+```{r}
+coxph(Surv(time = SCLC$time, event = SCLC$status) ~ SCLC$trt, data = SCLC)
+
+```
+
+-   If we wanted to test the hypothesis that the treatment tested would be effective in patients with adenocarcinoma, we could subset the data set, pulling out the patients with adenocarcinoma and perform either a log-rank test or CoxPH, as follows
+
+```{r}
+adeno <-  veteran %>% filter(celltype=="adeno")
+survdiff(Surv(time = adeno$time, event = adeno$status) ~ adeno$trt, data = adeno)
+```
+
+```{r}
+coxph(Surv(time = adeno$time, event = adeno$status) ~ adeno$trt, data = adeno)
+
+```
+
+-   If we wanted to test the hypothesis that the treatment tested would be effective in patients with squamous cell carcinoma, we could subset the data set, pulling out the patients with SCC and perform either a log-rank test or CoxPH, as follows
+
+```{r}
+SCC <-  veteran %>% filter(celltype=="squamous")
+survdiff(Surv(time = SCC$time, event = SCC$status) ~ SCC$trt, data = SCC)
+```
+
+```{r}
+coxph(Surv(time = SCC$time, event = SCC$status) ~ SCC$trt, data = SCC)
+
+```
+
+## Modeling more than one predictor
+
+### **Overview**
+
+-   The Cox Proportional Model can be used to evalute the effect of multiple Explanatory Variables (i.e Predictors) on an outcome - here survival
+
+-   To do so, use the following structure\
+    coxph(surv(TimeVariable, EventVariable) \~ IndicatorVariable1 + IndicatorVariable2 + ..., data = DataFrame)
+
+-   If we wanted to model the `Veteran` data set evaluating the effect on survival of the treatment **and** cell type we would use the following model
+
+```{r}
+coxph(Surv(time = veteran$time, event = veteran$status)  ~ veteran$trt + veteran$celltype, data = veteran)
+
+```
+
+If you had a biological rationale, you could build a model with all of the covariates in order to see their effect on survial, as follows:
+
+```{r}
+coxph(Surv(time = veteran$time, event = veteran$status)  ~ veteran$trt + veteran$celltype + veteran$karno + veteran$diagtime + veteran$age + veteran$prior, data = veteran)
+
+```
+
+# Review above principles with `colon` data set
+
+-   The **colon** data set consists of data from the trials evaluating adjuvant therapy in colon cancer and is a built-in dataset within R
+
+**Definition of Variables in Colon Data Set**\
+**id:** id\
+**study:** 1 for all patients\
+**rx:** Treatment - Obs(ervation), Lev(amisole), Lev(amisole)+5-FU\
+**sex:** 1=male\
+**age:** in years\
+**obstruct:** obstruction of colon by tumour\
+**perfor:** perforation of colon\
+**adhere:** adherence to nearby organs\
+**nodes:** number of lymph nodes with detectable cancer\
+**time:** days until event or censoring\
+**status:** censoring status\
+**differ:** differentiation of tumour (1=well, 2=moderate, 3=poor)\
+**extent:** Extent of local spread (1=submucosa, 2=muscle, 3=serosa, 4=contiguous structures)\
+**surg:** time from surgery to registration (0=short, 1=long)\
+**node4:** more than 4 positive lymph nodes\
+**etype:** event type: 1=recurrence,2=death
+
+Note: The study is originally described in a 1989 Journal of Clinical Oncology paper by Laurie et al. The main report is found in a 1990 New England Journal of Medicine paper by Moertel et al. This data set, which is contained in R, is closest to that of the final report in the 1991 Annals of Internal Medicine paper by Moertel et al. A version of the data with less follow-up time was used in the paper in Statistics in Medicine by Lin (1994).
+
+### **View Head of Data Set**
+
+```{r}
+kable(head(colon))
+```
+
+## Kaplan-Meier Curve of the colon data set
+
+```{r}
+colon_Survfit <- survfit(Surv(time = colon$time, event = colon$status) ~ 1, data = colon)
+colon_ggSurvplot <- ggsurvplot (fit = colon_Survfit, 
+           data = colon,
+           title = "Overall Survival",
+           subtitle = "Unstratified Curve",
+           font.title = c(22, "bold", "black"),
+           ggtheme = theme_dark() + theme(plot.title = element_text(hjust = 0.5, face = "bold"))+
+             # theme_dark will give a dark background with lines on the plot
+             theme(plot.subtitle = element_text(hjust = 0.5, size = 16, face = "italic")),
+           ####### Censor Details ########
+           censor = TRUE, # logical value. If TRUE, censors will be drawn
+           censor.shape="|",
+           censor.size = 5,
+           ####### Confidence Intervals ########
+           conf.int = TRUE, # To Remove conf intervals use "FALSE"
+           surv.median.line = "hv", # allowed values include one of c("none", "hv", "h", "v"). v: vertical, h:horizontal
+           ####### Format Axes #######
+           xlab="Days", # changes xlabel,
+           ylab = "Survival Probability",
+           font.x=c(18,"bold"), # changes x axis labels
+           font.y=c(18,"bold"), # changes y axis labels
+           font.xtickslab=c(14,"plain"), # changes the tick label on x axis
+           font.ytickslab=c(14,"plain"),
+           ######## Format Legend #######
+           legend.title = "All Patients",
+           legend.labs = c("Total Cohort"), # Change the Strata Legend
+           legend = c(0.8,0.8), #c(0,0) corresponds to the "bottom left" and c(1,1) corresponds to the "top right" position
+           ######## Plot Dimensions #######
+           surv.plot.height = 0.75, # Default is 0.75
+           ######## Risk Table #######
+           risk.table = FALSE, # Adds Risk Table
+           risk.table.height = 0.35, # Adjusts the height of the risk table (default is 0.25)
+           ######## p-value details #######
+           pval = FALSE,
+           pval.size = 5,
+           pval.coord = c(1,1)
+           )
+colon_ggSurvplot
+```
+
+### **View Kaplan-Meier Curve of Cohort Stratified by Treatment**
+
+First let's generate a survfit object of the data stratified by treatment
+
+```{r}
+colon_Survfit_rx <- survfit(Surv(time = colon$time, event = colon$status) ~ colon$rx, data = colon)
+  
+```
+
+Let's now view that survfit object
+
+```{r}
+colon_Survfit_rx
+
+```
+
+From the above table, it appears like the group of patients that received Levamisole (Lev) and 5-FU in the adjuvant setting had fewer events than those in the observation group or the levamisole only group.
+
+To evaluate if what we observed is different from what we'd expect under the null hypothesis, let's evaluate using the log-rank test
+
+```{r}
+survdiff(Surv(time, status) ~ rx, data = colon)# of note, you'll see that we used a slightly different way to write the above code. It's a simpler way in which we only use the column names and do not require the preceeding "colon$", which is actually not needed, since we are specifying the data set
+
+```
+
+As you can see from the above table, there are indeed much fewer events in the Lev+5FU group than what we'd expect under the null, and it is statistically significant
+
+Now we will generate a Kaplan-Meier curve of those three groups
+
+```{r}
+colon_ggSurvplot_rx <- ggsurvplot (fit = colon_Survfit_rx, 
+           data = colon,
+           title = "Overall Survival",
+           subtitle = "Stratified by Treatment Group",
+           font.title = c(22, "bold", "black"),
+           ggtheme = theme_minimal() + theme(plot.title = element_text(hjust = 0.5, face = "bold"))+
+             theme(plot.subtitle = element_text(hjust = 0.5, size = 16, face = "italic")),
+           ####### Censor Details ########
+           censor = TRUE, # logical value. If TRUE, censors will be drawn
+           censor.shape="|",
+           censor.size = 5,
+           ####### Confidence Intervals ########
+           conf.int = TRUE, # To Remove conf intervals use "FALSE"
+           surv.median.line = "hv", # allowed values include one of c("none", "hv", "h", "v"). v: vertical, h:horizontal
+           ####### Format Axes #######
+           xlab="Days", # changes xlabel,
+           ylab = "Survival Probability",
+           font.x=c(18,"bold"), # changes x axis labels
+           font.y=c(18,"bold"), # changes y axis labels
+           font.xtickslab=c(14,"plain"), # changes the tick label on x axis
+           font.ytickslab=c(14,"plain"),
+           ######## Format Legend #######
+           legend.title = "All Patients",
+           legend.labs = c("Observation","Levamisole","Levamisole + 5-FU"), # Change the Strata Legend
+           legend = c(0.8,0.8), #c(0,0) corresponds to the "bottom left" and c(1,1) corresponds to the "top right" position
+           ######## Plot Dimensions #######
+           surv.plot.height = 0.75, # Default is 0.75
+           ######## Risk Table #######
+           risk.table = FALSE, # Adds Risk Table
+           risk.table.height = 0.35, # Adjusts the height of the risk table (default is 0.25)
+           ######## p-value details #######
+           pval = TRUE,
+           pval.size = 5,
+           pval.coord = c(1,0.1)
+           )
+colon_ggSurvplot_rx
+```
+
+## Visualize Hazard Ratios with Forest Plots
+
+### **Overview**
+
+-   Forest plots allow you to evaluate the Hazard Ratios (HR) of all of the covariates that were used in the model you created\
+
+-   Let's build a model incorporating covariates that think might influence or explain (i.e. explanatory variables) the survival curve, such as *age*, *treatment*, whether or not the tumor *adhered* to other organs or if patients had *more than 4 nodes positive*, *differentiation status of the tumor*, the *extent of local spread* and *time from surgery to registration*
+
+    -   Biologically, all of these covariates may effect the outcome, so you might want to include them in your model
+
+```{r}
+model.colon <- coxph( Surv(time, status) ~ sex + rx + adhere + node4 + extent + surg + differ,
+                data = colon )
+model.colon # Call the model to inspect it's contents
+```
+
+From the above table, you see that there are a number of covariates that appear to be related to the survival outcome (here recurrence or death). - The column exp(coef) represents the "Hazard Ratio", which is the most common way to compare the relationship between an explanatory variable and the outcome variable in medical research\
+- A HR of 1 is the null hypothesis\
+- A HR \< 1 means that there is a decreased risk of the outcome (in survival analysis this = death) if that specific condition is met by the subject (i.e. they received the treatment)\
+- A HR \> 1 means that there is an increased risk of the outcome (in survival analysis this = death) if that specific condition is met by the subject (i.e. had more than 4 positive lymph nodes)
+
+Let's view the Forest Plot of that model
+
+```{r}
+ggforest(model.colon)
+
+```
+
+Interpretation from this model could be the following:\
+- There is no difference in death between males and females\
+- Treatment with Lev+5FU in this cohort is associated with a 35% decreased risk of recurrence or death compared to subjects that received only observation\
+- There is a trend to worse outcomes in patients tumors that adhere to nearby organs\
+- Worse outcomes are associated with more than 4 positive lymph nodes, extention of the tumor, long times between surgery and registration to the trial and poorly differentiated tumors.
+
+Of note, you'll see that your HRs will change depending on what covariates you include in your model. For example your interpretation of whether or not adherence to the surrounding tissue is associated with worse outcomes will be affected by the covariate you include in the model. Watch what happens if we leave "node4", "extent" and "differ" out of the model
+
+```{r}
+model.colon <- coxph( Surv(time, status) ~ sex + rx + adhere  + surg,
+                data = colon )
+ggforest(model.colon)
+```
+
+Now it appears that adherence to organs is indeed associated with worse outcomes with a p-value \<0.001), whereas in the first model the p-value of this covariate trended towards statistical significance but the 95% CI overlapped the null and therefore, rejecting the null would have been in appropriate
+
+##### **This brings up a critical principle in science.**
+
+-   You must be very rigorous about your hypothesis testing and prespecify which hypotheses you are going to test before you analyze your data\
+
+-   What can be tempting - but is inappropriate - is to look at your data from numerous viewpoints, testing one hypothesis in sequence after another in order to find a statistically significant *p* value\
+
+-   This practice is probably more common in science than we would like to acknowledge and can lead to inappropriate rejection of the null hypothesis
+
+    -   This methodology has many pejorative sobriquets including *"data dredging"*, *"data fishing"*, *"data butchery"* or *"p-hacking"*\
+
+    -   This highlights the need to be very thoughtful about your analysis upfront
+
+    -   Consulting a biostatistician before carrying out your analysis is ideal
+
+    -   In fact, consulting one before conducting your research, so you can have a **Statistical Analysis Plan** before you conduct your research, is part-and-parcel with good science
+
+# Conclusion
+
+-   Survival Analyses are some of the most common analysis in clinical research\
+
+-   R has several nice packages that can faciliate Survival Analysis
+
+-   Beware of "*p*-hacking": when in doubt, consult a biostatistician before you conduct your science!
+
+As always, please reach out to us with thoughts and feedback
+
+# Session Info
+
+```{r}
+sessionInfo()
+
+```

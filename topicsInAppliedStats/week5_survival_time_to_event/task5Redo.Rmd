@@ -1,0 +1,44 @@
+```{r}
+pdf <- function(t) 1/6 * (t + t^3)
+curve(pdf, from = 0, to = 2, ylab = "f(t)", xlab = "t")
+
+
+```
+
+```{r}
+require(mosaic)
+require(mosaicCalc)
+#find cdf from pdf 
+F_t <- antiD(pdf(t) ~ t)      
+```
+
+
+```{r}
+#find survival function and plot it 
+S_t <- function(t) 1- F_t(t)
+curve(S_t, from = 0, to = 2, ylab = "S(t)", xlab = "t")
+```
+
+```{r}
+#Find the hazard function and plot it
+h_t <- function(t) pdf(t)/S_t(t)
+curve(h_t, from = 0, to = 1.99, ylab = "h(t)", xlab = "t")
+```
+
+```{r}
+E_t_1 <-  (1 / S_t(1)) * integrate(S_t, lower = 1, upper = 2)$value  
+E_t_1
+```
+
+```{r}
+inverse <- function(f, lower, upper){
+
+  function(y){
+    uniroot(function(x){f(x) - y}, lower = lower, upper = upper)
+  }
+}
+invF <- inverse(F_t, 0, 2) # Inverse distribution function (quantile function)
+t_m <- invF(0.5)$root
+t_m
+```
+

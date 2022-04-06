@@ -1,0 +1,78 @@
+---
+html_document:
+  mathjax: http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+output: html_notebook
+title: "Assignment 2"
+author: "Mauricio Reis | D21125621"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
+```
+
+Complete the following project using R Markdown and ensure that your code and output are readable in the html file.
+
+### The `veteran` dataset
+```{r}
+library(survival)
+?veteran
+```
+
+<br>
+
+### Questions
+
+<br>
+
+1. Estimate and plot $S(t)$ for the two `prior` groups using the Kaplan-Meier estimator and find $\Pr(T > 200)$ for an individual with `prior` = 0 and `prior` = 10. [**25 marks**]
+```{r}
+SKM <- survfit(Surv(time, status) ~ prior, data = veteran)
+#summary(SKM)
+plot(SKM, 
+     col = c("blue", "red"),
+     lwd = 3,
+     main = "S(t) for the two prior groups on veteran Dataset\n marking point of survival beyond t = 200")
+
+legend("topright", 
+       c("prior = 0", "prior = 10"), 
+       lty = 1,
+       lwd = 3,
+       col = c("blue", "red"))
+S_200_prior0 <- summary(SKM, times = 200)$surv[1]
+S_200_prior10 <- summary(SKM, times = 200)$surv[2]
+points(200, y = S_200_prior0, type = "p", col = "black", pch = 16)
+points(200, y = S_200_prior10, type = "p", col = "black", pch = 16)
+```
+```{r}
+S_200_prior0 <- summary(SKM, times = 200)$surv[1]
+S_200_prior10 <- summary(SKM, times = 200)$surv[2]
+
+paste("Pr(T > 200) for prior 0:", signif(S_200_prior0, digits = 3))
+paste("Pr(T > 200) for prior 10:", signif(S_200_prior10, digits = 3))
+```
+### Comments on 1:  
+Lines cross here, it means I should be using Wilcoxon instead of Log-rank.
+
+
+2. Test whether there is a significant difference between the survival functions of the two `prior` groups and draw you conclusions. [**25 marks**]
+```{r}
+WT <- survdiff(Surv(time, status) ~ prior, data = veteran, rho = 1)
+WT
+```
+
+*conclusions here.* 
+First of all, as on the previous plot we've noticed that lines crossed, we concluded that we should use Wilcoxon test (rho=1) instead of Log-rank.  
+From this comparison, we got a p-value of 0.8 meaning that we failed to reject the null hypotesis as there is no statistically relevant difference between the curve for prior 0 (patient received prior therapy) and prior 10 (patient did not receive prior therapy)  
+
+
+3. Estimate the Weibull PH Model (using the **SurvRegCensCov** package) using the `age` and `prior` covariates. [**25 marks**]
+```{r}
+# replace this comment with your code
+
+```
+
+4. Create an R function estimating the hazard function of the Weibull PH model and,  using the estimates obtained above, and plot the hazard curve for an individual with `age` = 30 and `prior` = 10. [**25 marks**]
+```{r}
+# replace this comment with your code
+```
+

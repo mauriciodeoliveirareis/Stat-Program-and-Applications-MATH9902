@@ -1,0 +1,42 @@
+```{r}
+# pdf <- function(lambda, t) lambda * exp(-1 * lambda * t)
+# F_t <- function(lambda, t) 1 - exp(-1 * lambda * t)
+# S_t <- function(lambda, t) 1 - F_t(lambda, t)
+# H_t <- function(lambda, t) -1 * log(S_t(lambda, t))
+
+Hexp <- function(x, lambda) { 
+  lambda * x
+}
+
+Hweib <- function(x, lambda, gamma) { 
+  lambda * x^(gamma) 
+}
+```
+
+```{r}
+curve(Hexp(x, lambda = 2), 
+      from = 0, to = 10, lwd = 2, 
+      main = "T ~ Exp(2)", ylab = "H(t)", xlab = "t")
+```
+```{r}
+curve(Hweib(x, lambda = 1, gamma = 2), 
+      from = 0, to = 20, lwd = 2, 
+      main = "T ~ Weibull(1,2)", ylab = "H(t)", xlab = "t")
+
+```
+```{r}
+#Create the survival function S(t) for the Weibull distribution
+# m_S_t_weib <- function(x, lambda, gamma) {
+#   exp(-1 * Hweib(x,lambda,gamma))
+# }
+
+Sweib <- function(x, lambda, gamma) { 
+  exp(-lambda * x^gamma)
+}
+
+
+curve(m_S_t_weib(x, lambda = 0.1, gamma = 1.7), 
+      from = 0, to = 20, lwd = 2, 
+      main = "T ~ Weibull(0.1, 1.7)", ylab = "S(t)", xlab = "t")
+```
+

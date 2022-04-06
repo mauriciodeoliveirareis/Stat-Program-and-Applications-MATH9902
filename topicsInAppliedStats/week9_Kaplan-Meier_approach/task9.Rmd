@@ -1,0 +1,30 @@
+Estimate $S_{KM}(t)$ for the Veterans’ Administration Lung Cancer study dataset (veteran) and plot the estimated curve. Estimate the probability of surviving beyond time $t=28$
+(Hint: use the summary() function and specify the times argument. More info: ?summary.survfit).
+```{r}
+library(survival)
+vetFit <- survfit(Surv(time, status) ~ 1, data = veteran)
+summary(vetFit)
+```
+
+```{r}
+plot(SKM, main = "KM estimate of S(t)", ylab = "S(t)", xlab = "t")
+```
+
+```{r}
+#surviving beyond time t=28
+survAfter28 <- summary(vetFit, times = c(28))
+survAfter28$surv
+```
+Plot the corresponding estimate of H(t) using the `plot.survfit()` function and estimate H(t) at time t=33 from $S_{KM}(t)$
+```{r}
+plot(SKM, main = "Estimate of H(t)", ylab = "H(t)", xlab = "t", cumhaz = TRUE)
+
+```
+
+```{r}
+#estimate H(t) at time t=33
+surv33<- summary(vetFit, times = c(33))$surv
+
+-1 * log(surv33)
+```
+

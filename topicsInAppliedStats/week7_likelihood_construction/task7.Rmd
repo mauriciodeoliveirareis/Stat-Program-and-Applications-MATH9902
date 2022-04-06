@@ -1,0 +1,13 @@
+```{r}
+set.seed(32441582)
+n <- 1000
+t <- rexp(n, 0.7)
+summary(t)
+```
+
+```{r}
+#Find the maximum likelihood estimate for λ assuming that there’s no censoring.
+lambda_mle <- n / sum(t)
+lambda_mle
+```
+
