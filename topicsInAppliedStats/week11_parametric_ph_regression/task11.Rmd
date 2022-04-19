@@ -1,0 +1,30 @@
+1.  Load the Veterans' Administration Lung Cancer study dataset and fit a Weibull PH Model (using the `WeibullReg()` function of the **SurvRegCensCov** package) using the `age` and `trt` covariates.
+
+```{r}
+library(survival)
+library(SurvRegCensCov)
+
+WR <- WeibullReg(Surv(time, status) ~ age + factor(trt), data = veteran)
+WR 
+```
+
+2.  Create an R function estimating the survival function for the Weibull model using the estimates obtained and plot the survival curve for an individual with `trt` = 1 and `age` = 20.
+
+```{r}
+#TODO I have no idea if this is correct, need to double check once Alberto shows the solution
+Sweib <- function(t, 
+                  lambda = 0.008903236, 
+                  gamma = 0.861748851, 
+                  B_age = 0.010685230, 
+                  age = 20, 
+                  B_trt2 = -0.066830818, 
+                  trt2 = 0) { 
+  exp(-lambda * t^gamma) ^ exp(B_age * 20 + B_trt2 * trt2) 
+}
+curve(Sweib(t = x), 
+      from = 0, to = 50, lwd = 2, 
+      main = "T ~ Weibull(0.008903236, 0.861748851)", ylab = "S(t)", xlab = "t")
+```
+
+\
+WR \<- WeibullReg(Surv(time, status) \~ age + factor(trt), data = veteran)

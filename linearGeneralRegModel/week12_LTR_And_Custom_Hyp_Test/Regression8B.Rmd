@@ -1,0 +1,39 @@
+# Regression 8B Code
+
+```{r}
+current_path = rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+```
+
+# Poisson regression examples
+## health insurance claims
+```{r}
+
+hclaims = read.table("claims.txt",header=T)
+with(hclaims,plot(age,claims,pch=20,col='blue',cex=1.5))
+fit_hclaims=glm(claims~age,data=hclaims,family=poisson)
+fit_hclaims
+```
+```{r}
+summary(fit_hclaims)
+
+```
+```{r}
+drop1(fit_hclaims,test='LRT')
+```
+
+```{r}
+nd=data.frame(age=seq(18,40,by=.25))
+pred=predict(fit_hclaims,newdata=nd,type='response')
+plot(y = hclaims$claims, x = hclaims$age, col = 'blue')
+
+lines(nd$age,pred,lwd=3,col='red')
+
+
+```
+
+```{r}
+predict(fit_hclaims,newdata=data.frame(age=30),se.fit=T)
+
+```
+

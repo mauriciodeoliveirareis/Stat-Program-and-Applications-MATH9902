@@ -1,0 +1,108 @@
+# **Regression 7C Code** 
+
+```{r}
+current_path = rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+
+```
+
+```{r}
+titanic=read.csv('titanic.csv',header=T)
+titanic=titanic[complete.cases(titanic),]
+colnames(titanic)=tolower(colnames(titanic))
+attach(titanic)
+```
+
+## **Hypothesis testing**
+
+\
+
+```{r}
+fit4=glm(survived~age+factor(sex),family=binomial(),data=titanic)
+fit4
+```
+
+```{r}
+vcov(fit4)
+```
+
+```{r}
+summary(fit4)
+
+```
+
+## **get CI for parameter estimates**
+
+```{r}
+confint.default(fit4)
+```
+
+```{r}
+exp(confint.default(fit4))
+
+```
+
+## **get CI for predicted odds and probabilities**
+
+\
+
+```{r}
+fit3=glm(survived~fare+age+factor(sex)+factor(pclass),family=binomial(),data=titanic)
+```
+
+method (a)
+
+```{r}
+nd=data.frame(fare=82,age=34,sex='female',pclass=1)
+pred=predict(fit3,newdata=nd,se.fit=T,interval='confidence')
+predci=c(pred$fit-1.96*pred$se.fit,pred$fit+1.96*pred$se.fit)
+exp(predci) ## odds CI
+```
+```{r}
+exp(predci)/(1+exp(predci)) ## probability CI
+
+```
+
+method (b)
+```{r}
+L=matrix(c(1,82,34,0,0,0),nrow=1)
+library(multcomp)
+```
+
+```{r}
+glh=glht(fit3,linfct=L)
+summary(glh)
+```
+```{r}
+predci=confint(glh)[[9]][2:3]
+exp(predci) ## odds CI
+```
+```{r}
+exp(predci)/(1+exp(predci)) ## probability CI
+
+```
+
+for odds ratio
+```{r}
+summary(fit3)
+
+```
+```{r}
+lwr=-1.2765903-1.96*(0.3126370)
+upr=-1.2765903+1.96*(0.3126370)
+ci=exp(c(lwr,upr));1/ci
+```
+
+alternatively using GLHT
+
+
+```{r}
+L=matrix(c(0,0,0,0,-1,0),nrow=1)
+glh=glht(fit3,linfct=L)
+summary(glh)
+```
+```{r}
+predci=confint(glh)[[9]][2:3]
+exp(predci) ## odds CI
+```
+

@@ -1,0 +1,30 @@
+# **Regression 7B Code**
+
+```{r}
+current_path = rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+
+```
+
+```{r}
+titanic=read.csv('titanic.csv',header=T)
+titanic=titanic[complete.cases(titanic),]
+colnames(titanic)=tolower(colnames(titanic))
+attach(titanic)
+
+```
+
+## **categorical predictors**
+
+\
+
+```{r}
+fit2=glm(survived~factor(sex),family=binomial(),data=titanic)
+fit2
+
+```
+
+```{r}
+fit3=glm(survived~fare+age+factor(sex)+factor(pclass),family=binomial(),data=titanic)
+fit3
+```

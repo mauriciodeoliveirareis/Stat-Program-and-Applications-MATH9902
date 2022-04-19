@@ -1,0 +1,118 @@
+# Regression 8A Code
+
+```{r}
+current_path = rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+```
+
+```{r}
+titanic=read.csv('titanic.csv',header=T)
+titanic=titanic[complete.cases(titanic),]
+colnames(titanic)=tolower(colnames(titanic))
+fit=glm(survived~age+factor(sex)+factor(pclass),family=binomial(),data=titanic)
+summary(fit)
+```
+## customised hypothesis tests
+### compare second class with 3rd class
+
+```{r}
+library(multcomp)
+L=cbind(0,0,0,1,-1)
+glh=glht(fit,linfct=L)
+summary(glh) # test
+```
+```{r}
+confint(glh)$confint # CI on linear predictor scale (log odds)
+
+```
+
+```{r}
+exp(confint(glh)$confint) # CI on OR scale 
+```
+## compare a woman in 3rd class with a man in 2nd class?
+
+```{r}
+L=cbind(0,0,-1,-1,1)
+glh2=glht(fit,linfct=L)
+summary(glh2) # test
+
+```
+
+```{r}
+exp(confint(glh)$confint) # CI on OR scale 
+
+```
+## compare a woman in 3rd class with a man in 1st class?
+
+```{r}
+L=cbind(0,0,-1,0,1)
+glh3=glht(fit,linfct=L)
+summary(glh3) # test
+```
+
+```{r}
+exp(confint(glh3)$confint) # CI on OR scale 
+
+```
+
+# Likelihood Ratio Tests (LRTs) for Logistic regression
+```{r}
+neuralgia=read.table("neuralgia.txt",header=T)
+colnames(neuralgia)=tolower(colnames(neuralgia))
+head(neuralgia)
+```
+### Fit the model and get the log likelihood
+
+```{r}
+fit1=glm(pain~age+duration+factor(sex)+factor(treatment),family=binomial(),data=neuralgia)
+summary(fit1)
+
+```
+
+```{r}
+logLik(fit1)
+```
+
+### Testing the global null hypothesis
+```{r}
+fit0=update(fit1,.~1)
+logLik(fit0)
+```
+
+```{r}
+C=-2*(logLik(fit0)-logLik(fit1))
+C
+```
+
+```{r}
+pvalue=1-pchisq(C,5)
+pvalue
+```
+### Quicker method…
+```{r}
+anova(fit0,fit1,test='LRT')
+
+```
+## Testing for the need for sex and duration in the model
+
+```{r}
+anova(update(fit1,.~.-duration-factor(sex)),fit1,test='LRT')
+
+```
+
+### model building via LRT
+```{r}
+drop1(fit1,test='LRT')
+
+```
+
+```{r}
+fit2=update(fit1,.~.-duration)
+drop1(fit2,test='LRT')
+```
+
+```{r}
+summary(fit2)
+
+```
+

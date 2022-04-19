@@ -1,0 +1,59 @@
+# **Regression 7A Code**
+
+\
+
+```{r}
+current_path = rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+
+```
+
+```{r}
+titanic=read.csv('titanic.csv',header=T)
+titanic=titanic[complete.cases(titanic),]
+colnames(titanic)=tolower(colnames(titanic))
+attach(titanic)
+```
+
+## **Try linear regression with survived as response and fare as a continuous predictor**
+
+```{r}
+plot(fare,survived,pch=20,col='blue',cex=1.5)
+fitx=lm(survived~fare,data=titanic)
+abline(reg=fitx,col='red',lwd=2)
+```
+
+## **Group by deciles of fare?**
+
+```{r}
+group=cut(fare,quantile(fare,probs=c(0,seq(.1,.9,by=.1),1)))
+p_surv=by(survived,group,function(x) {prop.table(table(x))[2]})
+plot(1:10,p_surv,pch=20,cex=2,col='blue',xlab='Fare Deciles')
+abline(lm(p_surv~I(1:10)),col='red',lwd=2)
+
+```
+
+## **Use Logistic Regression**
+
+\
+
+```{r}
+fit1=glm(survived~fare,family=binomial(),data=titanic)
+fit1
+```
+
+```{r}
+summary(fit1)
+
+```
+
+## **Get a plot of the effect of fare on the probability of survival**
+
+\
+
+```{r}
+nd=data.frame(fare=seq(min(titanic$fare),max(titanic$fare),len=200))
+pred=predict(fit1,type='response',newdata=nd)
+plot(fare,survived,pch=20,col='blue',cex=1.5)
+lines(nd$fare,pred,type='l',lwd=2,col='red',xlab='Fare',ylab='p(survied)')
+```

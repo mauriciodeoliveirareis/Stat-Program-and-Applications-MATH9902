@@ -1,0 +1,100 @@
+"A motor insurance company is conducting an analysis of historic
+customer retention data. The response variable is a binary 
+indicator of whether that customer renewed their car insurance at
+the end of their policy period or did not (1=renewed, 0=did not 
+renew). Potential predictors were: the age group of the customer;
+the type of cover (comprehensive or third party fire & theft) and
+the engine size of the insured vehicle (coded A, B and C in order of 
+increasing engine size). 
+
+(a) Read the insurance.csv data into R.
+
+(b) Fit a logistic regression model to these data with retained 
+as the reponse variable and age, cover and engine_size as 
+predictors. Which predictors are related to the response?
+
+(c) Find the estimated odds ratio that a customer in the 20-29 
+age group will renew over a customer in the 50-60 age group - all
+other variables being equal.
+
+(d) Discuss the evidence for the predictor ‘cover’ being related
+to the response. 
+
+(e) Predict the probability that a customer with the following 
+values of the predictors would renew: age= 40-49, cover = 
+comprehensive, engine size= A.
+
+(f) State what type of customer the intercept is modelling in 
+this case. Calculate the odds that such a customer will renew and
+determine a 95% confidence interval for this odds."
+
+
+
+```{r}
+current_path = rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+```
+(a)Read data  
+
+```{r}
+insurance=read.csv('insurance.csv',header=T)
+```
+(b) Fit a logistic regression model to these data with retained 
+as the reponse variable and age, cover and engine_size as 
+predictors. Which predictors are related to the response?  
+
+```{r}
+fit=glm(retained~factor(age)+factor(cover)+factor(engine_size),family=binomial(),data=insurance)
+summary(fit)
+```
+A: age50-60 and factor(cover)Comprehensive are related to the response  
+  
+(c) Find the estimated odds ratio that a customer in the 20-29 
+age group will renew over a customer in the 50-60 age group - all
+other variables being equal.
+```{r}
+age50_60logOddsRatio <- fit$coefficients["factor(age)50-60"] * -1 # log odds ratio == - \beta_3
+age50_60oddsRatio <- exp(age50_60logOddsRatio)
+age50_60oddsRatio
+```
+  
+(d) Discuss the evidence for the predictor ‘cover’ being related
+to the response. 
+  
+- With a p-value of 0.01695 and a z-value of 2.388, we can say that cover is related to the response on this model with comprehensive cover contributing positively, 0.31110, for renewing an insurance.
+
+(e) Predict the probability that a customer with the following values of the predictors would renew: age= 40-49, cover = comprehensive, engine size= A.
+
+$$ \eta = \beta_0 + \beta_1(0) + \beta_2(1) + \beta_2(0) + \beta_3(0) + \beta_4(0) + \beta_5(1) + \beta_6(0) + \beta_7(0)$$
+$$ \eta = 1.04557 + 0.08053 + 0.31110 -> \eta = 1.4372 $$
+$$ P = \frac{e^{1.4372}}{1+e^{1.4372}}$$
+```{r}
+exp(1.4372)/ (1 + exp(1.4372))
+```
+
+(f) State what type of customer the intercept is modelling in 
+this case. Calculate the odds that such a customer will renew and
+determine a 95% confidence interval for this odds."
+  
+A 20-29 y/o customer with cover |"3rd Party, F & T" with engine size A
+
+$$\eta = \beta_0 -> \eta = 1.04557$$
+$$ odds = e^{1.04557} -> odds = 2.84502 $$
+$$ CI_{log odds} = \eta \pm Z(s.e.) -> 1.04557 \pm 1.96 * 0.21558 -> CI = [0.6230332,1.468107]$$
+$$ CI_{odds} = e^{CI_{log odds}} -> [e^{0.6230332}, e^{1.468107}] -> [1.864575, 4.341010]$$
+Or, with R:
+```{r}
+confint.default(fit)
+```
+```{r}
+exp(confint.default(fit))
+```
+```{r}
+nd=data.frame(age='20-29',
+              cover='3rd Party, F & T',
+              engine_size='A')
+pred=predict(fit,newdata=nd,se.fit=T,interval='confidence')
+predci=c(pred$fit-1.96*pred$se.fit,pred$fit+1.96*pred$se.fit)
+exp(predci)
+```
+

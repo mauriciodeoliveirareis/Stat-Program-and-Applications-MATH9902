@@ -1,0 +1,166 @@
+```{r,echo=FALSE}
+#set this file directory as current path
+current_path = rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+```
+
+# Telecoms Churn Data  
+```{r}
+#Install and load kable extra to render tables in a nicer way
+#install.packages("kableExtra")
+library(kableExtra)
+#install and load tidyverse to do dataset manipulations
+#install.packages("tidyverse")
+library(tidyverse)
+#read telecoms_churn csv file into a list in R and show basic 
+telecoms_churn=read.csv("telecoms_churn.csv",header=T)
+```
+
+## Introduction  
+```{r}
+str(telecoms_churn)
+table(telecoms_churn$gender) #table fpr genders 
+table(telecoms_churn[telecoms_churn$gender=="Male",]$partner) #table male with partners
+table(telecoms_churn[telecoms_churn$gender=="Female",]$partner) 
+#there is a higher proportion of female with partner, and higher proportion of males without partner
+count(telecoms_churn[!complete.cases(telecoms_churn),]) == 0 #there are no NAs
+```
+
+The Telecoms Churn Data is consisted of 512 observations and 7 variables from which one of those, `churn`, represents whether the customer was lost within 2 years (value=1) or not (value=0). Some things to be aware on this dataset is that there is a higher proportion of males (285) than females(227). Also, Male without partners are the majority 150 vs 135 without partner but for Females, there are 103 without partner and 124. This should be taken into consideration in case our customer demographics don't match with what we found on this dataset. 
+
+
+# Model 1: Logistic Regression with all predictors (except customerid)
+
+```{r}
+#fit a model with all predictors except customerid as it's a unique identifier
+attach(telecoms_churn)
+factorGender <- factor(gender)
+factorPartner <- factor(partner)
+factorPaymentMethod <- factor(paymentmethod)
+factorInternetservice <- factor(internetservice)
+detach(telecoms_churn)
+fit=glm(churn~monthlycharges+factorGender+factorPartner+factorPaymentMethod+factorInternetservice,
+        family=binomial(),data=telecoms_churn)
+summary(fit)
+
+```
+  
+The model that we have is the following:
+$$ \eta_i = \beta_0 + \beta_1 (monthlycharges_i) + \beta_2 (sexMale_i) + \beta_3 (partnerYes_i) + \\
+\beta_4 (payCreditCard_i) + \beta_5 (payEletronicCheck_i) + \beta_6 (payMailedCheck_i) + \\
+\beta_7 (serviceFiberOptic_i) + \beta_8 (serviceNo_i) $$  
+
+- Given an example of a male, living with his partner, monthly charges=70, internet service=fibre optic, payment method= credit card. The log odds of churning for him would be:
+
+$$ \eta_i = 0.17470 - 0.04908 \times 70 + 0.21865 \times 1 - 0.67730 \times 1 + 0.72001 \times 1 + \\
+1.72827 \times 0 + 0.94381 \times 0 + 1.76588 \times 1 - 2.78320 \times 0 \\
+   \eta_i = -1.23366 $$
+  
+And the probability:
+$$ P_i = \frac{e^{-1.23366}}{1 + e^{-1.23366}} = \frac{0.2912247}{1.2912247} = 0.2255415$$
+```{r}
+#TODO hide this
+# Probability for item 1 of the report 
+# calculating probability and CI of a male, living with his partner, monthly charges=70, 
+# internet service=fibre optic, payment method= credit card
+nd=data.frame(monthlycharges=70,
+              factorGender="Male",
+              factorPartner="Yes",
+              factorPaymentMethod="Credit card (automatic)",
+              factorInternetservice="Fiber optic"
+              )
+#predict log odds
+predLogOdds=predict(fit,type='link',newdata=nd, se.fit = TRUE)
+paste("Log Odds:", predLogOdds$fit)
+#predict probability
+predProb=predict(fit,type='response',newdata=nd, se.fit = TRUE)
+paste("Probability:", predProb$fit)
+```
+  
+Using R we can get the standard error for the model which is: 
+```{r}
+predLogOdds$se.fit
+```
+And the 95% confidence interval for this log odds estimate would be:
+$$CI = -1.23366 \pm 1.96 \times 0.4703643 = -1.23366 \pm 0.921914 = [-2.155574, -0.311746]$$ 
+And the 95% CI for this probability estimate would be:
+$$ CI = [\frac{e^{-2.155574}}{1 + e^{-2.155574}}, \frac{e^{-0.311746}}{1 + e^{-0.311746}} ] = 
+[0.1038115, 0.4226886]$$  
+
+```{r}
+#doing confidence interval in R
+uprLogOddsCI <- predLogOdds$fit + (1.96 * predLogOdds$se.fit)
+lwrLogOddsCI <- predLogOdds$fit - (1.96 * predLogOdds$se.fit)
+paste("Log Odds CI: [", lwrLogOddsCI,",",uprLogOddsCI,"]",sep = "")
+
+```
+
+```{r}
+#transform lof odds into probability:
+uprProbCI <- fit$family$linkinv(uprLogOddsCI)
+lwrProbCI <- fit$family$linkinv(lwrLogOddsCI)
+paste("Probability CI: [", lwrProbCI,",",uprProbCI,"]",sep = "")
+```
+  
+
+# Model 2 
+We've noticed in our Model 1 that the p-value for gender male categorical predictor was very high: 0.410096. Let's do a custom hypothesis test to look into more detail if we really need this predictor in the model:
+1. $H_0: \beta_2 = 0$  
+2. $H_\alpha=\beta_2\neq0$  
+3. Custom hypotesys test result of customer with all same pareters except one is male and is another female:  
+
+```{r}
+# Comparing customer with all same parms except one is male and another female
+library(multcomp)
+L=cbind(0,0,-1,0,0,0,0,0,0)
+glh=glht(fit,linfct=L)
+summary(glh)
+```
+4. P-value is greater than 0.05 (0.41)  
+5. We fail to reject the null hypothesis and conclude that gender is not significantly related to the response
+
+- Model 2:
+$$ \eta_i = \beta_0 + \beta_1 (monthlycharges_i) + \beta_2 (partnerYes_i) + \beta_3 (payCreditCard_i) + \beta_4 (payEletronicCheck_i) + \\
+\beta_5 (payMailedCheck_i) + \beta_6 (serviceFiberOptic_i) + \beta_7 (serviceNo_i) $$  
+
+```{r}
+fit2=update(fit,.~.-factorGender)
+summary(fit2)
+```
+```{r}
+#check which is the minimum montly charge? It there someone not paying for the service?
+min((telecoms_churn$monthlycharges))
+```
+
+In this model, the intercept is estimating a customer without a partner, who pays with bank transfer and has DSL as his Internet Service and pays 0 monthly charge (that seems like very unlikely case in real life and doesn't have any occurrence on this dataset). We can analyse better how each of those predictors relate to the response.  
+
+Let's first take a look into the payment method factor levels with high P-value, Credit card and Mailed check and how they compare with bank transfer.  
+Customer with all same parameters except one uses Bank Transfer and the other Credit Card:  
+```{r}
+# Comparing customer with all same parms except one uses Bank Transfer and the other Credit Card
+L=cbind(0,0,0,-1,0,0,0,0)
+glh=glht(fit2,linfct=L)
+summary(glh)
+
+```
+With P-value higher than 0.05 (0.221), we can conclude that Bank Transfer and Credit Card predictors difference isn't statistically relevant.
+- Customer with all same parameters except one uses Bank Transfer and the other Mailed Check:  
+
+```{r}
+# Comparing customer with all same parms except one uses Bank Transfer and the other Mailed Check
+L=cbind(0,0,0,0,0,-1,0,0)
+glh=glht(fit2,linfct=L)
+summary(glh)
+
+```
+With P-value higher than 0.05 (0.105), we can conclude that Bank Transfer and Mailed Check predictors difference also isn't statistically relevant.
+
+
+
+- Odds Ratio for a customer without partner over a customer with a partner:
+$$logOddsRatio= -\beta_2 = -(-0.69949) = 0.69949$$
+$$oddsRatio= e^{0.69949}=2.012726$$
+- Odds Ratio for a customer using bank transfer vs. a customer using electronic check
+$$logOddsRatio= -\beta_4 = -1.71683$$
+$$ oddsRatio= e^{-1.71683}=0.1796347 $$
+TODO continue doing odds ration for remaining categoricals and do chart about different fees for services
