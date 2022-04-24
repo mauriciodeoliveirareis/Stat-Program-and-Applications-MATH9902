@@ -217,15 +217,22 @@ count(telecoms_churn[!complete.cases(telecoms_churn),]) == 0 #there are no NAs</
 <p>The Telecoms Churn Data is consisted of 512 observations and 7 variables from which one of those, <code>churn</code>, represents whether the customer was lost within 2 years (value=1) or not (value=0). Some things to be aware on this dataset is that there is a higher proportion of males (285) than females(227). Also, Male without partners are the majority 150 vs 135 without partner but for Females, there are 103 without partner and 124. This should be taken into consideration in case our customer demographics don’t match with what we found on this dataset.</p>
 </div>
 </div>
-<div id="model-1-all-predictors" class="section level1">
-<h1>Model 1: All predictors</h1>
+<div id="model-1-logistic-regression-with-all-predictors-except-customerid" class="section level1">
+<h1>Model 1: Logistic Regression with all predictors (except customerid)</h1>
 <pre class="r"><code>#fit a model with all predictors except customerid as it&#39;s a unique identifier
-fit=glm(churn~monthlycharges+factor(gender)+factor(partner)+factor(paymentmethod)+factor(internetservice),family=binomial(),data=telecoms_churn)
+attach(telecoms_churn)
+factorGender &lt;- factor(gender)
+factorPartner &lt;- factor(partner)
+factorPaymentMethod &lt;- factor(paymentmethod)
+factorInternetservice &lt;- factor(internetservice)
+detach(telecoms_churn)
+fit=glm(churn~monthlycharges+factorGender+factorPartner+factorPaymentMethod+factorInternetservice,
+        family=binomial(),data=telecoms_churn)
 summary(fit)</code></pre>
 <pre><code>## 
 ## Call:
-## glm(formula = churn ~ monthlycharges + factor(gender) + factor(partner) + 
-##     factor(paymentmethod) + factor(internetservice), family = binomial(), 
+## glm(formula = churn ~ monthlycharges + factorGender + factorPartner + 
+##     factorPaymentMethod + factorInternetservice, family = binomial(), 
 ##     data = telecoms_churn)
 ## 
 ## Deviance Residuals: 
@@ -233,26 +240,26 @@ summary(fit)</code></pre>
 ## -1.4515  -0.6343  -0.3658  -0.2260   2.8508  
 ## 
 ## Coefficients:
-##                                              Estimate Std. Error z value
-## (Intercept)                                   0.17470    0.79264   0.220
-## monthlycharges                               -0.04908    0.01150  -4.269
-## factor(gender)Male                            0.21865    0.26543   0.824
-## factor(partner)Yes                           -0.67730    0.27075  -2.502
-## factor(paymentmethod)Credit card (automatic)  0.72001    0.56985   1.264
-## factor(paymentmethod)Electronic check         1.72827    0.50345   3.433
-## factor(paymentmethod)Mailed check             0.94381    0.56449   1.672
-## factor(internetservice)Fiber optic            1.76588    0.52663   3.353
-## factor(internetservice)No                    -2.78320    0.60766  -4.580
-##                                              Pr(&gt;|z|)    
-## (Intercept)                                  0.825559    
-## monthlycharges                               1.97e-05 ***
-## factor(gender)Male                           0.410096    
-## factor(partner)Yes                           0.012366 *  
-## factor(paymentmethod)Credit card (automatic) 0.206409    
-## factor(paymentmethod)Electronic check        0.000597 ***
-## factor(paymentmethod)Mailed check            0.094532 .  
-## factor(internetservice)Fiber optic           0.000799 ***
-## factor(internetservice)No                    4.65e-06 ***
+##                                            Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept)                                 0.17470    0.79264   0.220 0.825559
+## monthlycharges                             -0.04908    0.01150  -4.269 1.97e-05
+## factorGenderMale                            0.21865    0.26543   0.824 0.410096
+## factorPartnerYes                           -0.67730    0.27075  -2.502 0.012366
+## factorPaymentMethodCredit card (automatic)  0.72001    0.56985   1.264 0.206409
+## factorPaymentMethodElectronic check         1.72827    0.50345   3.433 0.000597
+## factorPaymentMethodMailed check             0.94381    0.56449   1.672 0.094532
+## factorInternetserviceFiber optic            1.76588    0.52663   3.353 0.000799
+## factorInternetserviceNo                    -2.78320    0.60766  -4.580 4.65e-06
+##                                               
+## (Intercept)                                   
+## monthlycharges                             ***
+## factorGenderMale                              
+## factorPartnerYes                           *  
+## factorPaymentMethodCredit card (automatic)    
+## factorPaymentMethodElectronic check        ***
+## factorPaymentMethodMailed check            .  
+## factorInternetserviceFiber optic           ***
+## factorInternetserviceNo                    ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
@@ -263,15 +270,241 @@ summary(fit)</code></pre>
 ## AIC: 401.67
 ## 
 ## Number of Fisher Scoring iterations: 6</code></pre>
-<p>The model that we have is the following: <span class="math display">\[ \eta_i = \beta_0 + \beta_1 (monthlycharges_i) + \beta_2 (sexMale_i) + \beta_3 (partnerYes_i) + \\
-\beta_4 (payCreditCard_i) + \beta_5 (payEletronicCheck_i) + \beta_6 (payMailedCheck_i) + \\
-\beta_7 (serviceFiberOptic_i) + \beta_8 (serviceNo_i) \]</span></p>
+<p>The model that we have is the following: <span class="math display">\[ \eta_i = \beta_0 + \beta_1 (monthlycharges_i) + \beta_2 \delta_{i,sexMale} + 
+\beta_3 \delta_{i,partnerYes} + \beta_4 \delta_{i,payCreditCard} + \beta_5 \delta_{i,payEletronicCheck} \\
++ \beta_6 \delta_{i,payMailedCheck} + \beta_7 \delta_{i,serviceFiberOptic} + \beta_8 \delta_{i,serviceNo}\]</span></p>
 <ul>
-<li>Given an example of a male, living with his partner, monthly charges=70, internet service=fibre optic, payment method= credit card. The probability of churning for him would be:</li>
+<li>Given an example of a male, living with his partner, monthly charges=70, internet service=fibre optic, payment method= credit card. The log odds of churning for him would be:</li>
 </ul>
 <p><span class="math display">\[ \eta_i = 0.17470 - 0.04908 \times 70 + 0.21865 \times 1 - 0.67730 \times 1 + 0.72001 \times 1 + \\
 1.72827 \times 0 + 0.94381 \times 0 + 1.76588 \times 1 - 2.78320 \times 0 \\
-   \eta_i = 1\]</span></p>
+   \eta_i = -1.23366 \]</span></p>
+<p>And the probability: <span class="math display">\[ P_i = \frac{e^{-1.23366}}{1 + e^{-1.23366}} = \frac{0.2912247}{1.2912247} = 0.2255415\]</span></p>
+<pre class="r"><code>#TODO hide this
+# Probability for item 1 of the report 
+# calculating probability and CI of a male, living with his partner, monthly charges=70, 
+# internet service=fibre optic, payment method= credit card
+nd=data.frame(monthlycharges=70,
+              factorGender=&quot;Male&quot;,
+              factorPartner=&quot;Yes&quot;,
+              factorPaymentMethod=&quot;Credit card (automatic)&quot;,
+              factorInternetservice=&quot;Fiber optic&quot;
+              )
+#predict log odds
+predLogOdds=predict(fit,type=&#39;link&#39;,newdata=nd, se.fit = TRUE)
+paste(&quot;Log Odds:&quot;, predLogOdds$fit)</code></pre>
+<pre><code>## [1] &quot;Log Odds: -1.23378830756825&quot;</code></pre>
+<pre class="r"><code>#predict probability
+predProb=predict(fit,type=&#39;response&#39;,newdata=nd, se.fit = TRUE)
+paste(&quot;Probability:&quot;, predProb$fit)</code></pre>
+<pre><code>## [1] &quot;Probability: 0.225519071162182&quot;</code></pre>
+<p>Using R we can get the standard error for the model which is:</p>
+<pre class="r"><code>predLogOdds$se.fit</code></pre>
+<pre><code>## [1] 0.4703643</code></pre>
+<p>And the 95% confidence interval for this log odds estimate would be: <span class="math display">\[CI = -1.23366 \pm 1.96 \times 0.4703643 = -1.23366 \pm 0.921914 = [-2.155574, -0.311746]\]</span> And the 95% CI for this probability estimate would be: <span class="math display">\[ CI = [\frac{e^{-2.155574}}{1 + e^{-2.155574}}, \frac{e^{-0.311746}}{1 + e^{-0.311746}} ] = 
+[0.1038115, 0.4226886]\]</span></p>
+<pre class="r"><code>#doing confidence interval in R
+uprLogOddsCI &lt;- predLogOdds$fit + (1.96 * predLogOdds$se.fit)
+lwrLogOddsCI &lt;- predLogOdds$fit - (1.96 * predLogOdds$se.fit)
+paste(&quot;Log Odds CI: [&quot;, lwrLogOddsCI,&quot;,&quot;,uprLogOddsCI,&quot;]&quot;,sep = &quot;&quot;)</code></pre>
+<pre><code>## [1] &quot;Log Odds CI: [-2.15570232163774,-0.31187429349876]&quot;</code></pre>
+<pre class="r"><code>#transform log odds into probability:
+uprProbCI &lt;- fit$family$linkinv(uprLogOddsCI)
+lwrProbCI &lt;- fit$family$linkinv(lwrLogOddsCI)
+paste(&quot;Probability CI: [&quot;, lwrProbCI,&quot;,&quot;,uprProbCI,&quot;]&quot;,sep = &quot;&quot;)</code></pre>
+<pre><code>## [1] &quot;Probability CI: [0.103799563709307,0.422657311137512]&quot;</code></pre>
+</div>
+<div id="model-2" class="section level1">
+<h1>Model 2</h1>
+<p>We’ve noticed in our Model 1 that the p-value for gender male categorical predictor was very high: 0.410096. Let’s do a custom hypothesis test to look into more detail if we really need this predictor in the model:</p>
+<ol style="list-style-type: decimal">
+<li><span class="math inline">\(H_0: \beta_2 = 0\)</span><br />
+</li>
+<li><span class="math inline">\(H_\alpha:\beta_2\neq0\)</span><br />
+</li>
+<li>Custom hypotesys test result of customer with all same pareters except one is male and is another female:</li>
+</ol>
+<pre class="r"><code># Comparing customer with all same parms except one is male and another female
+library(multcomp)</code></pre>
+<pre><code>## Warning: package &#39;multcomp&#39; was built under R version 4.1.2</code></pre>
+<pre><code>## Loading required package: mvtnorm</code></pre>
+<pre><code>## Loading required package: survival</code></pre>
+<pre><code>## Loading required package: TH.data</code></pre>
+<pre><code>## Loading required package: MASS</code></pre>
+<pre><code>## 
+## Attaching package: &#39;MASS&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:dplyr&#39;:
+## 
+##     select</code></pre>
+<pre><code>## 
+## Attaching package: &#39;TH.data&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:MASS&#39;:
+## 
+##     geyser</code></pre>
+<pre class="r"><code>L=cbind(0,0,-1,0,0,0,0,0,0)
+glh=glht(fit,linfct=L)
+summary(glh)</code></pre>
+<pre><code>## 
+##   Simultaneous Tests for General Linear Hypotheses
+## 
+## Fit: glm(formula = churn ~ monthlycharges + factorGender + factorPartner + 
+##     factorPaymentMethod + factorInternetservice, family = binomial(), 
+##     data = telecoms_churn)
+## 
+## Linear Hypotheses:
+##        Estimate Std. Error z value Pr(&gt;|z|)
+## 1 == 0  -0.2186     0.2654  -0.824     0.41
+## (Adjusted p values reported -- single-step method)</code></pre>
+<ol start="4" style="list-style-type: decimal">
+<li>P-value is greater than 0.05 (0.41)<br />
+</li>
+<li>We fail to reject the null hypothesis and conclude that gender is not significantly related to the response</li>
+</ol>
+<ul>
+<li>Model 2: <span class="math display">\[ \eta_i = \beta_0 + \beta_1 (monthlycharges_i) + \beta_2 \delta_{i,partnerYes} + 
+\beta_3 \delta_{i,payCreditCard} + \beta_4 \delta_{i,payEletronicCheck} + \\
+\beta_5 \delta_{i,payMailedCheck} + \beta_6 \delta_{i,serviceFiberOptic} + \beta_7 \delta_{i,serviceNo}\]</span></li>
+</ul>
+<pre class="r"><code>fit2=update(fit,.~.-factorGender)
+summary(fit2)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = churn ~ monthlycharges + factorPartner + factorPaymentMethod + 
+##     factorInternetservice, family = binomial(), data = telecoms_churn)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.4194  -0.6325  -0.3779  -0.2240   2.8796  
+## 
+## Coefficients:
+##                                            Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept)                                 0.32758    0.77106   0.425 0.670948
+## monthlycharges                             -0.04890    0.01147  -4.263 2.02e-05
+## factorPartnerYes                           -0.69949    0.26924  -2.598 0.009375
+## factorPaymentMethodCredit card (automatic)  0.69418    0.56781   1.223 0.221494
+## factorPaymentMethodElectronic check         1.71683    0.50241   3.417 0.000633
+## factorPaymentMethodMailed check             0.91125    0.56192   1.622 0.104874
+## factorInternetserviceFiber optic            1.74224    0.52453   3.322 0.000895
+## factorInternetserviceNo                    -2.78252    0.60709  -4.583 4.58e-06
+##                                               
+## (Intercept)                                   
+## monthlycharges                             ***
+## factorPartnerYes                           ** 
+## factorPaymentMethodCredit card (automatic)    
+## factorPaymentMethodElectronic check        ***
+## factorPaymentMethodMailed check               
+## factorInternetserviceFiber optic           ***
+## factorInternetserviceNo                    ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 460.30  on 511  degrees of freedom
+## Residual deviance: 384.35  on 504  degrees of freedom
+## AIC: 400.35
+## 
+## Number of Fisher Scoring iterations: 5</code></pre>
+<pre class="r"><code>#check which is the minimum montly charge? It there someone not paying for the service?
+min((telecoms_churn$monthlycharges))</code></pre>
+<pre><code>## [1] 19.05</code></pre>
+<pre class="r"><code>#No</code></pre>
+<p>In this model, the intercept is estimating a customer without a partner, who pays with bank transfer and has DSL as his Internet Service and pays 0 monthly charge (that seems like very unlikely case in real life and doesn’t have any occurrence on this dataset). We can analyse better how each of those predictors relate to the response.</p>
+<div id="categorical-predictors-levels-and-how-they-differ-from-each-other" class="section level3">
+<h3>Categorical Predictors levels and how they differ from each other</h3>
+<p>Let’s first take a look into the payment method factor levels with high P-value, Credit card and Mailed check and how they compare with bank transfer. Let’s see also if there is a different between them both and between Internet Service with Fiber Optic and with No Service #### Customer with all same parameters except one uses Bank Transfer and the other Credit Card</p>
+<pre class="r"><code># Comparing customer with all same parms except one uses Bank Transfer and the other Credit Card
+L=cbind(0,0,0,-1,0,0,0,0)
+glh=glht(fit2,linfct=L)
+summary(glh)</code></pre>
+<pre><code>## 
+##   Simultaneous Tests for General Linear Hypotheses
+## 
+## Fit: glm(formula = churn ~ monthlycharges + factorPartner + factorPaymentMethod + 
+##     factorInternetservice, family = binomial(), data = telecoms_churn)
+## 
+## Linear Hypotheses:
+##        Estimate Std. Error z value Pr(&gt;|z|)
+## 1 == 0  -0.6942     0.5678  -1.223    0.221
+## (Adjusted p values reported -- single-step method)</code></pre>
+<p>With P-value higher than 0.05 (0.221), we can conclude that Bank Transfer and Credit Card predictors difference isn’t statistically relevant.</p>
+<div id="customer-with-all-same-parameters-except-one-uses-bank-transfer-and-the-other-mailed-check" class="section level4">
+<h4>Customer with all same parameters except one uses Bank Transfer and the other Mailed Check</h4>
+<pre class="r"><code># Comparing customer with all same parms except one uses Bank Transfer and the other Mailed Check
+L=cbind(0,0,0,0,0,-1,0,0)
+glh=glht(fit2,linfct=L)
+summary(glh)</code></pre>
+<pre><code>## 
+##   Simultaneous Tests for General Linear Hypotheses
+## 
+## Fit: glm(formula = churn ~ monthlycharges + factorPartner + factorPaymentMethod + 
+##     factorInternetservice, family = binomial(), data = telecoms_churn)
+## 
+## Linear Hypotheses:
+##        Estimate Std. Error z value Pr(&gt;|z|)
+## 1 == 0  -0.9113     0.5619  -1.622    0.105
+## (Adjusted p values reported -- single-step method)</code></pre>
+<p>With P-value higher than 0.05 (0.105), we can conclude that Bank Transfer and Mailed Check predictors difference also isn’t statistically relevant.</p>
+</div>
+<div id="customer-with-all-same-parameters-except-one-uses-credit-card-and-the-other-mailed-check" class="section level4">
+<h4>Customer with all same parameters except one uses Credit Card and the other Mailed Check</h4>
+<pre class="r"><code># Comparing customer with all same parms except one uses Credit Card and the other Mailed Check
+L=cbind(0,0,0,1,0,-1,0,0)
+glh=glht(fit2,linfct=L)
+summary(glh)</code></pre>
+<pre><code>## 
+##   Simultaneous Tests for General Linear Hypotheses
+## 
+## Fit: glm(formula = churn ~ monthlycharges + factorPartner + factorPaymentMethod + 
+##     factorInternetservice, family = binomial(), data = telecoms_churn)
+## 
+## Linear Hypotheses:
+##        Estimate Std. Error z value Pr(&gt;|z|)
+## 1 == 0  -0.2171     0.4431   -0.49    0.624
+## (Adjusted p values reported -- single-step method)</code></pre>
+<p>With P-value higher than 0.05 (0.624), we can conclude that Credit Card and Mailed Check predictors difference isn’t statistically relevant.</p>
+</div>
+<div id="customer-with-all-same-parameters-except-one-has-fiber-optic-service-and-other-has-no-internet-service" class="section level4">
+<h4>Customer with all same parameters except one has Fiber Optic service and other has No Internet Service</h4>
+<pre class="r"><code># Comparing customer with all same parms except one hasFiber Optic service and other 
+#has No Internet Service
+L=cbind(0,0,0,0,0,0,1,-1)
+glh=glht(fit2,linfct=L)
+summary(glh)</code></pre>
+<pre><code>## 
+##   Simultaneous Tests for General Linear Hypotheses
+## 
+## Fit: glm(formula = churn ~ monthlycharges + factorPartner + factorPaymentMethod + 
+##     factorInternetservice, family = binomial(), data = telecoms_churn)
+## 
+## Linear Hypotheses:
+##        Estimate Std. Error z value Pr(&gt;|z|)    
+## 1 == 0   4.5248     0.9148   4.946 7.58e-07 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## (Adjusted p values reported -- single-step method)</code></pre>
+<p>With a p-value way below 0.05 (7.577122e-07), we can conclude that the difference between Fiber Optic and No service is statistically relevant. ```</p>
+</div>
+</div>
+<div id="odds-ratios" class="section level3">
+<h3>Odds Ratios</h3>
+<div id="odds-ratio-for-a-customer-without-partner-over-a-customer-with-a-partner" class="section level4">
+<h4>Odds Ratio for a customer without partner over a customer with a partner:</h4>
+<p><span class="math display">\[logOddsRatio= -\beta_2 = -(-0.69949) = 0.69949\]</span> <span class="math display">\[oddsRatio= e^{0.69949}=2.012726\]</span> We can see that the odds for a customer without a partner to churn are higher than in the case of a customer without a partner.</p>
+</div>
+<div id="odds-ratio-for-a-customer-using-bank-transfer-over-a-customer-using-electronic-check" class="section level4">
+<h4>Odds Ratio for a customer using bank transfer over a customer using electronic check</h4>
+<p><span class="math display">\[logOddsRatio= -\beta_4 = -1.71683\]</span> <span class="math display">\[ oddsRatio= e^{-1.71683}=0.1796347 \]</span> We can see that the odds of churn for a customer using bank transfer are lower than for a customer using eletronic check.</p>
+</div>
+<div id="odds-ratio-for-a-customer-that-has-dsl-over-a-customer-that-has-fiber-optic-service" class="section level4">
+<h4>Odds Ratio for a customer that has DSL over a customer that has Fiber optic service</h4>
+<p><span class="math display">\[ logOddsRatio= -\beta_2 = -(-0.69949) = 0.69949 \]</span></p>
+</div>
+<div id="odds-ratio-for-a-customer-that-has-dsl-over-a-customer-that-has-no-internet-service" class="section level4">
+<h4>Odds Ratio for a customer that has DSL over a customer that has No Internet service</h4>
+<p>… #### Odds Ratio for a customer that has Fiber optic over a customer that has No Internet service … TODO do chart about different fees for services and write conclusions</p>
+</div>
+</div>
 </div>
 
 
