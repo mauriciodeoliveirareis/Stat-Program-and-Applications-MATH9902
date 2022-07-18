@@ -107,3 +107,5 @@ fit_turkey2b=lm(weight~factor(feed)*age,data=turkey)
 drop1(fit_turkey2,test='F')
 ```
 
+$$ 2.5 = \frac{1}{0.2 +\frac{0.8}{n}} -> n = 4$$
+$$ 4 = \frac{1}{0.2 +\frac{0.8}{n}} -> n = 16$$

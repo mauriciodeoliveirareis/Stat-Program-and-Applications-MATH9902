@@ -1,5 +1,7 @@
 1.  Load the Veterans' Administration Lung Cancer study dataset and fit a Weibull PH Model (using the `WeibullReg()` function of the **SurvRegCensCov** package) using the `age` and `trt` covariates.
 
+Wiebull: the distribution of events overtime follows a Weibull, characterized by Lambda and gamma. Gamma shapes the Hazard. If gamma is bigger than one, the hazard will increase, if gamma is between 0 and 1, it will decrease
+
 ```{r}
 library(survival)
 library(SurvRegCensCov)
@@ -13,18 +15,22 @@ WR
 ```{r}
 #TODO I have no idea if this is correct, need to double check once Alberto shows the solution
 Sweib <- function(t, 
-                  lambda = 0.008903236, 
-                  gamma = 0.861748851, 
-                  B_age = 0.010685230, 
+                  lambda = WR$coef[1,1], 
+                  gamma = WR$coef[2,1], 
+                  B_age = WR$coef[3,1], 
                   age = 20, 
-                  B_trt2 = -0.066830818, 
+                  B_trt2 = WR$coef[4,1], 
                   trt2 = 0) { 
   exp(-lambda * t^gamma) ^ exp(B_age * 20 + B_trt2 * trt2) 
 }
 curve(Sweib(t = x), 
-      from = 0, to = 50, lwd = 2, 
+      from = 0, to = 1000, lwd = 3, 
       main = "T ~ Weibull(0.008903236, 0.861748851)", ylab = "S(t)", xlab = "t")
 ```
 
 \
 WR \<- WeibullReg(Surv(time, status) \~ age + factor(trt), data = veteran)
+
+Video, 5 minutes presentation, slides or capture the screen. Summirize the output of the Weibull model. First analyse the gamma, then check the betas and see if they are significant. After, compare two groups enfacizing the difference of the covariants.
+
+Submit the Rmd file

@@ -1,0 +1,156 @@
+---
+html_document:
+  mathjax: http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+author: "Mauricio Reis | D21125621"
+title: "Assignment 2"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
+```
+
+Complete the following project using R Markdown and ensure that your code and output are readable in the html file.
+
+### The `veteran` dataset
+
+```{r}
+library(survival)
+?veteran
+```
+
+#### Talking points
+
+Hello, welcome to this video
+
+-   We gonna use the Veteran dataset that represents data from a randomised trial of two treatments for lung cancer.\
+-   Here in this analisys we gonna focus into two [[things:\\\\](things:\\){.uri}]([things:\\](things:\){.uri}){.uri}
+
+1.  The relevance of having prior treatment for the survival of each patient (prior 0 to no prior and 10 to prior).\
+2.  The effect of age of the patient for the survival
+
+-   Also relevant for this video, we have time that represents the survival time for each patient and status that represents censoring status.\
+
+```{r}
+head(veteran)
+```
+
+### Questions
+
+#### Talking points Kaplan Meier
+
+-   We estimate and plotted the survival function for the two prior groups using Kaplan-Meier estimator.
+
+-   We also found the probability of survival for each one of those prior groups for time bigger than 200.
+
+1.  Estimate and plot $S(t)$ for the two `prior` groups using the Kaplan-Meier estimator and find $\Pr(T > 200)$ for an individual with `prior` = 0 and `prior` = 10. [**25 marks**]\
+
+```{r}
+#Create a Survival object using time and status to be the response and say it's explained by prior
+SKM <- survfit(Surv(time, status) ~ prior, data = veteran)
+summary(SKM)
+```
+
+```{r}
+plot(SKM, 
+     col = c("blue", "red"),
+     lwd = 3,
+     main = "S(t) for the two prior groups on veteran Dataset\n marking point of survival beyond t = 200")
+
+legend("topright", 
+       c("prior = 0", "prior = 10"), 
+       lty = 1,
+       lwd = 3,
+       col = c("blue", "red"))
+S_200_prior0 <- summary(SKM, times = 200)$surv[1]
+S_200_prior10 <- summary(SKM, times = 200)$surv[2]
+points(200, y = S_200_prior0, type = "p", col = "black", pch = 16)
+points(200, y = S_200_prior10, type = "p", col = "black", pch = 16)
+
+```
+
+### Talking points
+
+-   We can see here the survival function for prior 0 and 10 as well as where the point above 200 is located.\
+-   This gives an impression that patient with previous treatment have a higher survival probability at time 200\
+-   Also important to notice for later that those two lines cross\
+-   Also printed here down below
+
+```{r}
+print(paste("Pr(T > 200) for prior 0:", signif(S_200_prior0, digits = 3)))
+print(paste("Pr(T > 200) for prior 10:", signif(S_200_prior10, digits = 3)))
+```
+
+2.  Test whether there is a significant difference between the survival functions of the two `prior` groups and draw you conclusions. [**25 marks**]
+
+#### Talking points, which rho?
+
+-   First of all, as on the previous plot we've noticed that lines crossed, we concluded that we should use Wilcoxon test (rho=1) instead of Log-rank.\
+
+```{r}
+WT <- survdiff(Surv(time, status) ~ prior, data = veteran, rho = 1)
+WT
+```
+
+#### Talking points diff
+
+-   From this comparison, we got a p-value of 0.8 meaning that we failed to reject the null hypotesis as there is no statistically relevant difference between the survival functions for prior 0 (patient did not receive prior therapy) and prior 10 (patient received prior therapy)
+
+Estimate the Weibull PH Model (using the **SurvRegCensCov** package) using the `age` and `prior` covariates. [**25 marks**]
+
+#### Talking points Weibull PH Model
+
+-   We gonna use the Veteran dataset that represents data from a randomised trial of two treatments for lung cancer.
+
+-   Here we estimate the Weibull PH model using age and prior
+
+-   We used Surv function to build the survival object
+
+-   Put it explained by age and the factor variable prior
+
+    \
+
+```{r}
+library(SurvRegCensCov)
+
+WR <- WeibullReg(Surv(time, status) ~ age + factor(prior), data = veteran)
+WR 
+```
+
+#### Talking points Weibull distribution
+
+-   Gamma is \< 1 (0.867) so, hazard decreases over time.\
+-   The model suggests that age has a negative effect on survival\
+-   And having prior have a positive effect on survival\
+-   But, age, with a p-value (0.317) and prior, with a p-value (0.349), are both above 0.05 so, we can conclude that they are not statistically relevant for the model
+
+Create an R function estimating the hazard function of the Weibull PH model and, using the estimates obtained above, and plot the hazard curve for an individual with `age` = 30 and `prior` = 10. [**25 marks**]\
+
+#### Talking points hazard function
+
+-   Created a generic function to estimate hazard for this model\
+-   Plotted hazard for an 30 years old individual with prior treatment\
+
+```{r}
+
+h_weib <- function(x, lambda, gamma, beta_age, beta_prior, x_age, x_prior) {
+  lambda * gamma * x^(gamma-1) * exp(beta_age * x_age + beta_prior * x_prior)
+}
+lambdaVet <- WR$coef[1, 1]
+gammaVet <- WR$coef[2, 1]
+beta_ageVet <- WR$coef[3, 1]
+beta_priorVet <- WR$coef[4, 1]
+
+
+curve(
+  h_weib(x, lambda = lambdaVet, gamma = gammaVet, beta_age = beta_ageVet, 
+        beta_prior = beta_priorVet, x_age = 30, x_prior = 1), 
+      from = 0, to = 1000, lwd = 3, 
+      ylab = 'h(t)', xlab = 't', main = "Hazard function of the Weibull PH model for \nindividual with age 30 and prior treatment")
+```
+
+#### Talking points hazard chart
+
+-   As expected, with gamma lower than 1, the hazard decreases over time

@@ -1,10 +1,13 @@
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo=FALSE) 
+```
+
 ```{r,echo=FALSE}
 #set this file directory as current path
 current_path = rstudioapi::getActiveDocumentContext()$path
 setwd(dirname(current_path))
 ```
 
-# Telecoms Churn Data  
 ```{r}
 #Install and load kable extra to render tables in a nicer way
 #install.packages("kableExtra")
@@ -14,60 +17,32 @@ library(kableExtra)
 library(tidyverse)
 #read telecoms_churn csv file into a list in R and show basic 
 telecoms_churn=read.csv("telecoms_churn.csv",header=T)
+
 ```
 
-## Introduction  
-```{r}
-str(telecoms_churn)
-table(telecoms_churn$gender) #table fpr genders 
-table(telecoms_churn[telecoms_churn$gender=="Male",]$partner) #table male with partners
-table(telecoms_churn[telecoms_churn$gender=="Female",]$partner) 
-#there is a higher proportion of female with partner, and higher proportion of males without partner
-count(telecoms_churn[!complete.cases(telecoms_churn),]) == 0 #there are no NAs
-```
-
-The Telecoms Churn Data is consisted of 512 observations and 7 variables from which one of those, `churn`, represents whether the customer was lost within 2 years (value=1) or not (value=0). Some things to be aware on this dataset is that there is a higher proportion of males (285) than females(227). Also, Male without partners are the majority 150 vs 135 without partner but for Females, there are 103 without partner and 124. This should be taken into consideration in case our customer demographics don't match with what we found on this dataset. 
-
-
-# Model 1: Logistic Regression with all predictors (except customerid)
-
-```{r}
-#fit a model with all predictors except customerid as it's a unique identifier
+```{r, results='hide'}
+# QUESTION 1 STARTS HERE
+#1.a Fitting a model with all predictors except customerid as it's a unique identifier
 attach(telecoms_churn)
-factorGender <- factor(gender)
-factorPartner <- factor(partner)
-factorPaymentMethod <- factor(paymentmethod)
-factorInternetservice <- factor(internetservice)
+fGender <- factor(gender)
+fPartner <- factor(partner)
+fPayMethod <- factor(paymentmethod)
+fInternetservice <- factor(internetservice)
 detach(telecoms_churn)
-fit=glm(churn~monthlycharges+factorGender+factorPartner+factorPaymentMethod+factorInternetservice,
+fit=glm(churn~monthlycharges+fGender+fPartner+fPayMethod+fInternetservice,
         family=binomial(),data=telecoms_churn)
 summary(fit)
-
 ```
-  
-The model that we have is the following:
-$$ \eta_i = \beta_0 + \beta_1 (monthlycharges_i) + \beta_2 \delta_{i,sexMale} + 
-\beta_3 \delta_{i,partnerYes} + \beta_4 \delta_{i,payCreditCard} + \beta_5 \delta_{i,payEletronicCheck} \\
-+ \beta_6 \delta_{i,payMailedCheck} + \beta_7 \delta_{i,serviceFiberOptic} + \beta_8 \delta_{i,serviceNo}$$  
 
-- Given an example of a male, living with his partner, monthly charges=70, internet service=fibre optic, payment method= credit card. The log odds of churning for him would be:
+```{r, results='hide'}
+# 1.b calculating probability of churn for a male, with partner, 
+# monthly charges=70, internet service=fibre optic, payment method= credit card
 
-$$ \eta_i = 0.17470 - 0.04908 \times 70 + 0.21865 \times 1 - 0.67730 \times 1 + 0.72001 \times 1 + \\
-1.72827 \times 0 + 0.94381 \times 0 + 1.76588 \times 1 - 2.78320 \times 0 \\
-   \eta_i = -1.23366 $$
-  
-And the probability:
-$$ P_i = \frac{e^{-1.23366}}{1 + e^{-1.23366}} = \frac{0.2912247}{1.2912247} = 0.2255415$$
-```{r}
-#TODO hide this
-# Probability for item 1 of the report 
-# calculating probability and CI of a male, living with his partner, monthly charges=70, 
-# internet service=fibre optic, payment method= credit card
 nd=data.frame(monthlycharges=70,
-              factorGender="Male",
-              factorPartner="Yes",
-              factorPaymentMethod="Credit card (automatic)",
-              factorInternetservice="Fiber optic"
+              fGender="Male",
+              fPartner="Yes",
+              fPayMethod="Credit card (automatic)",
+              fInternetservice="Fiber optic"
               )
 #predict log odds
 predLogOdds=predict(fit,type='link',newdata=nd, se.fit = TRUE)
@@ -76,39 +51,75 @@ paste("Log Odds:", predLogOdds$fit)
 predProb=predict(fit,type='response',newdata=nd, se.fit = TRUE)
 paste("Probability:", predProb$fit)
 ```
-  
-Using R we can get the standard error for the model which is: 
-```{r}
-predLogOdds$se.fit
-```
-And the 95% confidence interval for this log odds estimate would be:
-$$CI = -1.23366 \pm 1.96 \times 0.4703643 = -1.23366 \pm 0.921914 = [-2.155574, -0.311746]$$ 
-And the 95% CI for this probability estimate would be:
-$$ CI = [\frac{e^{-2.155574}}{1 + e^{-2.155574}}, \frac{e^{-0.311746}}{1 + e^{-0.311746}} ] = 
-[0.1038115, 0.4226886]$$  
 
-```{r}
-#doing confidence interval in R
+```{r, results='hide'}
+#1.c.1 calculating the 95% Log Odds CI for the estimate above
 uprLogOddsCI <- predLogOdds$fit + (1.96 * predLogOdds$se.fit)
 lwrLogOddsCI <- predLogOdds$fit - (1.96 * predLogOdds$se.fit)
 paste("Log Odds CI: [", lwrLogOddsCI,",",uprLogOddsCI,"]",sep = "")
 
 ```
 
-```{r}
-#transform log odds into probability:
+```{r, results='hide'}
+#1.c.1 calculating the 95% Probability CI for the estimate above
 uprProbCI <- fit$family$linkinv(uprLogOddsCI)
 lwrProbCI <- fit$family$linkinv(lwrLogOddsCI)
 paste("Probability CI: [", lwrProbCI,",",uprProbCI,"]",sep = "")
 ```
-  
 
-# Model 2 
-We've noticed in our Model 1 that the p-value for gender male categorical predictor was very high: 0.410096. Let's do a custom hypothesis test to look into more detail if we really need this predictor in the model:  
+# Telecoms Churn Data  
+
+### Introduction  
+```{r, results='hide'}
+# just examining the data...
+str(telecoms_churn)
+prop.table(table(telecoms_churn$gender)) # table for genders 
+prop.table(table(telecoms_churn[telecoms_churn$gender=="Male",]$partner)) #male w/ partners
+prop.table(table(telecoms_churn[telecoms_churn$gender=="Female",]$partner)) 
+# there is a higher proportion of female with partner, 
+# and higher proportion of males without partner
+count(telecoms_churn[!complete.cases(telecoms_churn),]) == 0 #there are no NAs
+#how the charges differ between services?
+mean(telecoms_churn$monthlycharges) ## mean 66.5
+sd(telecoms_churn$monthlycharges) ## sd 29.9
+mean(telecoms_churn$monthlycharges[telecoms_churn$internetservice == "No"]) # mean 21.3
+sd(telecoms_churn$monthlycharges[telecoms_churn$internetservice == "No"]) # sd 2.22
+mean(telecoms_churn$monthlycharges[telecoms_churn$internetservice == "Fiber optic"]) # mean 92.06
+sd(telecoms_churn$monthlycharges[telecoms_churn$internetservice == "Fiber optic"]) # sd 12.22
+
+```
+
+The Telecoms Churn Data is consisted of 512 observations and 7 variables from which one of those, `churn`, represents whether the customer was lost within 2 years (value=1) or not (value=0). This dataset also has a field called monthlycharges that represents how much a customer is charged per month which is on average 66.5 but this sum varies according to the internet service being offered with "No" internet service monthlycharges mean being only 21.3.  
+There is also a higher proportion of males 56%, than females. And, male customers without a partner are more common 53% whereas for female customers, it's more common to have a partner as of them 55% have.
+
+
+### Model 1: Logistic Regression with all predictors (except customerid)
+  
+The model with all the predictors looks like this:
+$$ \eta_i = \beta_0 + \beta_1 (monthlycharges_i) + \beta_2 \delta_{i,sexMale} + 
+\beta_3 \delta_{i,partnerYes} + \beta_4 \delta_{i,payCreditCard} + \beta_5 \delta_{i,payEletronicCheck} \\
++ \beta_6 \delta_{i,payMailedCheck} + \beta_7 \delta_{i,serviceFiberOptic} + \beta_8 \delta_{i,serviceNo} $$  
+
+With the following predictors seen on Table 1:
+```{r}
+summary(fit)$coefficients %>% 
+  kbl(caption = "Table 1: Model 1 Coefficients") %>%
+  kable_styling()
+```
+
+
+  - Using this model for a prediction, given an example of a male, living with his partner, monthly charges=70, internet service=fibre optic, payment method= credit card. The log odds of churning for him would be:
+
+$$ \eta_i = 0.17470 - 0.04908 \times 70 + 0.21865 \times 1 - 0.67730 \times 1 + 0.72001 \times 1 + \\
+1.72827 \times 0 + 0.94381 \times 0 + 1.76588 \times 1 - 2.78320 \times 0 \\
+   \eta_i = -1.23366 $$
+  
+### Model 2 
+Table 1 shows that, in Model 1, the p-value for gender male categorical predictor was very high: 0.410096. Let's do a custom hypothesis test to look into more detail if we really need this predictor in the model:  
 
 1. $H_0: \beta_2 = 0$  
 2. $H_\alpha:\beta_2\neq0$  
-3. Custom hypotesys test result of customer with all same pareters except one is male and is another female:  
+3. Custom hypothesis test result of customer with all same parameters except one is male and is another female:  
 
 ```{r}
 # Comparing customer with all same parms except one is male and another female
@@ -120,36 +131,44 @@ summary(glh)
 4. P-value is greater than 0.05 (0.41)  
 5. We fail to reject the null hypothesis and conclude that gender is not significantly related to the response
 
-- Model 2:
+- After the removal of gender, the new model looks like this now:  
 $$ \eta_i = \beta_0 + \beta_1 (monthlycharges_i) + \beta_2 \delta_{i,partnerYes} + 
 \beta_3 \delta_{i,payCreditCard} + \beta_4 \delta_{i,payEletronicCheck} + \\
 \beta_5 \delta_{i,payMailedCheck} + \beta_6 \delta_{i,serviceFiberOptic} + \beta_7 \delta_{i,serviceNo}$$  
+Also, Table 2 shows the coeficients for this new model
 
 ```{r}
-fit2=update(fit,.~.-factorGender)
-summary(fit2)
+fit2=update(fit,.~.-fGender)
+summary(fit2)$coefficients %>% 
+  kbl(caption = "Table 2: Model 2 Coefficients") %>%
+  kable_styling()
 ```
-```{r}
+
+```{r, results='hide'}
 #check which is the minimum montly charge? It there someone not paying for the service?
 min((telecoms_churn$monthlycharges))
 #No
 ```
 
-In this model, the intercept is estimating a customer without a partner, who pays with bank transfer and has DSL as his Internet Service and pays 0 monthly charge (that seems like very unlikely case in real life and doesn't have any occurrence on this dataset). We can analyse better how each of those predictors relate to the response.  
+In this model, the intercept is estimating a customer without a partner, who pays with bank transfer and has DSL as his Internet Service and pays 0 monthly charge (that seems like very unlikely case in real life and doesn't have any occurrence on this dataset). Moving forward, this analisys will show how each of those predictors relate to the response.  
 
 ### Categorical Predictors levels and how they differ from each other
 
-Let's first take a look into the payment method factor levels with high P-value, Credit card and Mailed check and how they compare with bank transfer. Let's see also if there is a different between them both and between Internet Service with Fiber Optic and with No Service  
+Let's first take a look into the payment method factor levels with high P-value, Credit card and Mailed check and how they compare with bank transfer. Let's see also if there is a different between them both and between Internet Service with Fiber Optic and with No Service.  
 
 #### Customer with all same parameters except one uses Bank Transfer and the other Credit Card  
 ```{r}
+getGlhPvalue <- function(aGlhResult) {
+  return (paste("GLH p-value result:", summary(aGlhResult)$test$pvalues[1]))
+}
 # Comparing customer with all same parms except one uses Bank Transfer and the other Credit Card
 L=cbind(0,0,0,-1,0,0,0,0)
 glh=glht(fit2,linfct=L)
-summary(glh)
+getGlhPvalue(glh)
 
 ```
-With P-value higher than 0.05 (0.221), we can conclude that Bank Transfer and Credit Card predictors difference isn't statistically relevant.
+As shown in the output of "Simultaneous Tests for General Linear Hypotheses
+", with P-value higher than 0.05 (0.221), it's possible to conclude that Bank Transfer and Credit Card predictors difference isn't statistically relevant.
   
 
 #### Customer with all same parameters except one uses Bank Transfer and the other Mailed Check  
@@ -158,30 +177,32 @@ With P-value higher than 0.05 (0.221), we can conclude that Bank Transfer and Cr
 # Comparing customer with all same parms except one uses Bank Transfer and the other Mailed Check
 L=cbind(0,0,0,0,0,-1,0,0)
 glh=glht(fit2,linfct=L)
-summary(glh)
+getGlhPvalue(glh)
 
 ```
-With P-value higher than 0.05 (0.105), we can conclude that Bank Transfer and Mailed Check predictors difference also isn't statistically relevant.
+With P-value higher than 0.05 (0.105), it's possible to conclude that Bank Transfer and Mailed Check predictors difference also isn't statistically relevant.
 
 #### Customer with all same parameters except one uses Credit Card and the other Mailed Check  
 ```{r}
+
 # Comparing customer with all same parms except one uses Credit Card and the other Mailed Check
 L=cbind(0,0,0,1,0,-1,0,0)
 glh=glht(fit2,linfct=L)
-summary(glh)
+getGlhPvalue(glh)
 ```
-With P-value higher than 0.05 (0.624), we can conclude that Credit Card and Mailed Check predictors difference isn't statistically relevant.  
+With P-value higher than 0.05 (0.624), it's possible to conclude that Credit Card and Mailed Check predictors difference isn't statistically relevant.  
 
 #### Customer with all same parameters except one has Fiber Optic service and other has No Internet Service
 ```{r}
+
 # Comparing customer with all same parms except one hasFiber Optic service and other 
 #has No Internet Service
 L=cbind(0,0,0,0,0,0,1,-1)
 glh=glht(fit2,linfct=L)
-summary(glh)
+getGlhPvalue(glh)
 
 ```
-With a p-value way below 0.05 (7.577122e-07), we can conclude that the difference between Fiber Optic and No service is statistically relevant.
+With a p-value way below 0.05 (7.577e-07), it's possible to conclude that the difference between Fiber Optic and No service is statistically relevant.
 
 
 ### Odds Ratios
@@ -189,12 +210,12 @@ With a p-value way below 0.05 (7.577122e-07), we can conclude that the differenc
 #### Odds Ratio for a customer without partner over a customer with a partner:
 $$logOddsRatio= -\beta_2 = -(-0.69949) = 0.69949$$
 $$oddsRatio= e^{0.69949}=2.012726$$
-We can see that the odds for a customer without a partner to churn are higher than in the case of a customer without a partner.  
+As shown above, the odds for a customer without a partner to churn are higher than in the case of a customer without a partner.  
 
 #### Odds Ratio for a customer using bank transfer over a customer using electronic check
 $$logOddsRatio= -\beta_4 = -1.71683$$
 $$ oddsRatio= e^{-1.71683}=0.1796347 $$ 
-We can see that the odds of churn for a customer using bank transfer are lower than for a customer using eletronic check.
+As shown above, the odds of churn for a customer using bank transfer are lower than for a customer using eletronic check.
 
 #### Odds Ratio for a customer that has DSL over a customer that  has Fiber optic service.
 $$ logOddsRatio= -\beta_6 = -1.74224 $$ 
@@ -211,13 +232,164 @@ $$ logOddsRatio= \beta6-\beta_7 = 1.74224 -(-2.78252) = 4.52476 $$
 $$ oddsRatio= e^{4.52476}=92.27378$$
 The odds of churn for a customer with Fiber optic are dramatically higher than for a customer with No Internet service.
 
-## Conclusions and limitations of the model
+### Conclusions and limitations of the model 2
 
-As risk factors for churn we can consider that:
-- The higher the Monthly charges, the less likely the customers are to churn, which might be true but, may suggest a need to a interaction term to be added to our model or even that we are missing some important piece of information from customers that might affect montlycharges like time since contract has started. Both of those discussions are out of the scope of this work.  
+As risk factors for churn we can consider that:  
+
+- The higher the Monthly charges, the less likely the customers are to churn, which might be true but, may suggest a need to a interaction term to be added to this model or even that we it's missing some important piece of information from customers that might affect montlycharges like time since contract has started. Other possibility, depending the business needs, is that this dataset could be divided and analysed separately for each type of service since their average monthly charges vary considerably and their customer profile and competitiviness could also vary. 
 
 - Customers with a partner are less likely to churn also, according to this model is safe to make the assumption that not having a partner is a risk factor to leave the service. 
 
-- Customers who pay with Eletronic check are less likely to churn than the customers with other forms of payments. We didn't find any evidence that the other remaining types payments are statiscally different from each other, all can be considered risk factors.
+- Customers who pay with Eletronic check are less likely to churn than the customers with other forms of payments. This analysis didn't find any evidence that the other remaining types payments are statiscally different from each other, all can be considered risk factors.
 
-- Customers with Fiber optic service are more likely to churn than with the other services and customers without Internet service are considerably less likely to churn. We can conclude that having any internet service, and specially Fiber optic service, is one of risk factors to churn.  
+- Customers with Fiber optic service are more likely to churn than with the other services and customers without Internet service are considerably less likely to churn. This analysis has shown that having any internet service, and specially Fiber optic service, is one of risk factors to churn.  
+
+
+
+\newpage  
+
+## R Code:  
+
+```{r, echo=TRUE, eval = FALSE}
+#set this file directory as current path
+current_path = rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+```
+
+```{r, echo=TRUE, eval = FALSE}
+#Install and load kable extra to render tables in a nicer way
+#install.packages("kableExtra")
+library(kableExtra)
+#install and load tidyverse to do dataset manipulations
+#install.packages("tidyverse")
+library(tidyverse)
+#read telecoms_churn csv file into a list in R and show basic 
+telecoms_churn=read.csv("telecoms_churn.csv",header=T)
+
+```
+
+```{r, echo=TRUE, eval = FALSE}
+# QUESTION 1 STARTS HERE
+#1.a Fitting a model with all predictors except customerid as it's a unique identifier
+attach(telecoms_churn)
+fGender <- factor(gender)
+fPartner <- factor(partner)
+fPayMethod <- factor(paymentmethod)
+fInternetservice <- factor(internetservice)
+detach(telecoms_churn)
+fit=glm(churn~monthlycharges+fGender+fPartner+fPayMethod+fInternetservice,
+        family=binomial(),data=telecoms_churn)
+summary(fit)
+```
+
+```{r, echo=TRUE, eval = FALSE}
+# 1.b calculating probability of churn for a male, with partner, 
+# monthly charges=70, internet service=fibre optic, payment method= credit card
+
+nd=data.frame(monthlycharges=70,
+              fGender="Male",
+              fPartner="Yes",
+              fPayMethod="Credit card (automatic)",
+              fInternetservice="Fiber optic"
+              )
+#predict log odds
+predLogOdds=predict(fit,type='link',newdata=nd, se.fit = TRUE)
+paste("Log Odds:", predLogOdds$fit)
+#predict probability
+predProb=predict(fit,type='response',newdata=nd, se.fit = TRUE)
+paste("Probability:", predProb$fit)
+```
+
+```{r, echo=TRUE, eval = FALSE}
+#1.c.1 calculating the 95% Log Odds CI for the estimate above
+uprLogOddsCI <- predLogOdds$fit + (1.96 * predLogOdds$se.fit)
+lwrLogOddsCI <- predLogOdds$fit - (1.96 * predLogOdds$se.fit)
+paste("Log Odds CI: [", lwrLogOddsCI,",",uprLogOddsCI,"]",sep = "")
+
+```
+
+```{r, echo=TRUE, eval = FALSE}
+#1.c.1 calculating the 95% Probability CI for the estimate above
+uprProbCI <- fit$family$linkinv(uprLogOddsCI)
+lwrProbCI <- fit$family$linkinv(lwrLogOddsCI)
+paste("Probability CI: [", lwrProbCI,",",uprProbCI,"]",sep = "")
+```
+
+```{r, echo=TRUE, eval = FALSE}
+# just examining the data...
+str(telecoms_churn)
+prop.table(table(telecoms_churn$gender)) # table for genders 
+prop.table(table(telecoms_churn[telecoms_churn$gender=="Male",]$partner)) #male w/ partners
+prop.table(table(telecoms_churn[telecoms_churn$gender=="Female",]$partner)) 
+# there is a higher proportion of female with partner, 
+# and higher proportion of males without partner
+count(telecoms_churn[!complete.cases(telecoms_churn),]) == 0 #there are no NAs
+#how the charges differ between services?
+mean(telecoms_churn$monthlycharges) ## mean 66.5
+sd(telecoms_churn$monthlycharges) ## sd 29.9
+mean(telecoms_churn$monthlycharges[telecoms_churn$internetservice == "No"]) # mean 21.3
+sd(telecoms_churn$monthlycharges[telecoms_churn$internetservice == "No"]) # sd 2.22
+mean(telecoms_churn$monthlycharges[telecoms_churn$internetservice == "Fiber optic"]) # mean 92.06
+sd(telecoms_churn$monthlycharges[telecoms_churn$internetservice == "Fiber optic"]) # sd 12.22
+```
+
+```{r, echo=TRUE, eval = FALSE}
+summary(fit)$coefficients %>% 
+  kbl(caption = "Table 1: Model 1 Coefficients") %>%
+  kable_styling()
+```
+
+
+```{r, echo=TRUE, eval = FALSE}
+# Comparing customer with all same parms except one is male and another female
+library(multcomp)
+L=cbind(0,0,-1,0,0,0,0,0,0)
+glh=glht(fit,linfct=L)
+summary(glh)
+```
+
+```{r, echo=TRUE, eval = FALSE}
+fit2=update(fit,.~.-fGender)
+summary(fit2)$coefficients %>% 
+  kbl(caption = "Table 2: Model 2 Coefficients") %>%
+  kable_styling()
+```
+
+```{r, echo=TRUE, eval = FALSE}
+#check which is the minimum montly charge? It there someone not paying for the service?
+min((telecoms_churn$monthlycharges))
+#No
+```
+
+```{r, echo=TRUE, eval = FALSE}
+getGlhPvalue <- function(aGlhResult) {
+  return (paste("GLH p-value result:", summary(aGlhResult)$test$pvalues[1]))
+}
+# Comparing customer with all same parms except one uses Bank Transfer and the other Credit Card
+L=cbind(0,0,0,-1,0,0,0,0)
+glh=glht(fit2,linfct=L)
+getGlhPvalue(glh)
+```
+
+```{r, echo=TRUE, eval = FALSE}
+# Comparing customer with all same parms except one uses Bank Transfer and the other Mailed Check
+L=cbind(0,0,0,0,0,-1,0,0)
+glh=glht(fit2,linfct=L)
+getGlhPvalue(glh)
+```
+
+```{r, echo=TRUE, eval = FALSE}
+# Comparing customer with all same parms except one uses Credit Card and the other Mailed Check
+L=cbind(0,0,0,1,0,-1,0,0)
+glh=glht(fit2,linfct=L)
+getGlhPvalue(glh)
+```
+
+```{r, echo=TRUE, eval = FALSE}
+# Comparing customer with all same parms except one hasFiber Optic service and other 
+#has No Internet Service
+L=cbind(0,0,0,0,0,0,1,-1)
+glh=glht(fit2,linfct=L)
+getGlhPvalue(glh)
+```
+
